@@ -102,7 +102,7 @@ class WebsiteService
      * 
      * @param array $urls Array of URLs to be cached for clearing
      * @param string $redisKey The Redis key to store URLs (default: 'cache_clear_urls')
-     * @return int Number of URLs actually added (excluding duplicates)
+     * @return int|void Number of URLs actually added (excluding duplicates)
      */
     public static function storeUrlsForCacheClearing(array $urls, string $redisKey = 'cache_clear_urls')
     {

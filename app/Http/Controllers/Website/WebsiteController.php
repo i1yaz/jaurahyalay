@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Website;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Club;
 use App\Models\Admin\Tournament;
-use Facades\App\Services\WebsiteService;
+use App\Services\WebsiteService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Cache;
@@ -17,19 +17,19 @@ class WebsiteController extends Controller
     {
         $title = 'Home';
         $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
-            return WebsiteService::getFirstActiveTournamentForIndex();
+            return (new WebsiteService)->getFirstActiveTournamentForIndex();
 
         });
 
         $resultDate = $this->isTodayFlyingDay($firstActiveTournament);
         if ($firstActiveTournament != null && $resultDate != 'total') {
-            $tournament = WebsiteService::getTournamentResultByDateForIndex($firstActiveTournament, $resultDate);
-            $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($firstActiveTournament, $resultDate);
+            $tournament = (new WebsiteService)->getTournamentResultByDateForIndex($firstActiveTournament, $resultDate);
+            $sortedResultAndPlayers = (new WebsiteService)->getSortedResultByDate($firstActiveTournament, $resultDate);
             $players = $tournament->tournamentResult->groupBy('player_id');
             $IndexView = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } elseif ($firstActiveTournament != null && $resultDate == 'total') {
-            $sortedResultAndPlayers = WebsiteService::getTournamentTotal($firstActiveTournament);
-            $players = WebsiteService::getTournamentTotalByDays($firstActiveTournament);
+            $sortedResultAndPlayers = (new WebsiteService)->getTournamentTotal($firstActiveTournament);
+            $players = (new WebsiteService)->getTournamentTotalByDays($firstActiveTournament);
             $tournament = $firstActiveTournament;
             $IndexView = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         }
@@ -44,8 +44,8 @@ class WebsiteController extends Controller
             $page = 1;
         }
         $title = $club->name;
-        $tournaments = WebsiteService::getAllTournamentsOfThisClub($club);
-        $tournamentsPositions = WebsiteService::getAllClubTournamentsWithPrizes($tournaments);
+        $tournaments = (new WebsiteService)->getAllTournamentsOfThisClub($club);
+        $tournamentsPositions = (new WebsiteService)->getAllClubTournamentsWithPrizes($tournaments);
         $clubResultIndexView = (string) FacadeView::make('website.club.index', compact('club', 'tournaments', 'tournamentsPositions', 'title'));
 
         return $clubResultIndexView;
@@ -65,14 +65,14 @@ class WebsiteController extends Controller
             if ($date !== 'total') {
                 set_time_limit(300);
                 $resultDate = $date;
-                $tournament = WebsiteService::getTournamentResultByDateForIndex($tournament, $resultDate);
-                $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($tournament, $resultDate);
+                $tournament = (new WebsiteService)->getTournamentResultByDateForIndex($tournament, $resultDate);
+                $sortedResultAndPlayers = (new WebsiteService)->getSortedResultByDate($tournament, $resultDate);
                 $players = $tournament->tournamentResult->groupBy('player_id');
                 $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
             } else {
                 set_time_limit(300);
-                $sortedResultAndPlayers = WebsiteService::getTournamentTotal($tournament);
-                $players = WebsiteService::getTournamentTotalByDays($tournament);
+                $sortedResultAndPlayers = (new WebsiteService)->getTournamentTotal($tournament);
+                $players = (new WebsiteService)->getTournamentTotalByDays($tournament);
                 $resultDate = $date;
                 $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
 
@@ -84,14 +84,14 @@ class WebsiteController extends Controller
         if ($date !== 'total') {
             set_time_limit(300);
             $resultDate = $date;
-            $tournament = WebsiteService::getTournamentResultByDateForIndex($tournament, $resultDate);
-            $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($tournament, $resultDate);
+            $tournament = (new WebsiteService)->getTournamentResultByDateForIndex($tournament, $resultDate);
+            $sortedResultAndPlayers = (new WebsiteService)->getSortedResultByDate($tournament, $resultDate);
             $players = $tournament->tournamentResult->groupBy('player_id');
             $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } else {
             set_time_limit(300);
-            $sortedResultAndPlayers = WebsiteService::getTournamentTotal($tournament);
-            $players = WebsiteService::getTournamentTotalByDays($tournament);
+            $sortedResultAndPlayers = (new WebsiteService)->getTournamentTotal($tournament);
+            $players = (new WebsiteService)->getTournamentTotalByDays($tournament);
             $resultDate = $date;
             $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         }
