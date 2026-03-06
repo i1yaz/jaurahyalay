@@ -162,8 +162,8 @@ class WebsiteController extends Controller
 
     public function refresh()
     {
-        opcache_reset();
-        dd(WebsiteService::flushCache(), 'System has been updated');
+        WebsiteService::flushCache();
+        dd('System has been updated');
     }
 
     /**

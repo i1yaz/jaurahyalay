@@ -113,7 +113,7 @@ class WebsiteService
         return collect($data);
     }
 
-    public static function flushCache($tournament_id = null, $date = null, $club_id = null): void
+    public static function flushCache($tournament_id = null, $date = null, $club_id = null)
     {
         if ($tournament_id && $date && $club_id) {
             $routes = [];
@@ -143,21 +143,24 @@ class WebsiteService
                 return empty($path) ? '/' : $path;
             }, $routes);
 
-            try {
-                // Stale while revalidate purge in LiteSpeed exclusively for the URIs that changed
-                LSCache::purgeItems($paths, true); // true sets the "stale," prefix
-            } catch (\Exception $e) {
-                Cache::flush();
-                LSCache::purgeAll();
-            }
-
             self::storeUrlsForCacheClearing($routes);
+
+            // Return headers array so the controller can attach it to the Laravel response
+            $items = implode(',', $paths);
+
+            return [
+                'X-LiteSpeed-Purge' => 'stale,'.$items,
+            ];
         } else {
             Cache::flush();
-            LSCache::purgeAll();
+            try {
+                LSCache::purgeAll();
+            } catch (\Exception $e) {
+            }
             opcache_reset();
             Cache::store('remember_forever_cache_store')->flush();
 
+            return [];
         }
     }
 
