@@ -2,27 +2,24 @@
 
 namespace App\Services;
 
-use Exception;
-use Carbon\Carbon;
 use App\Models\Admin\Club;
 use App\Models\Admin\News;
 use App\Models\Admin\Result;
 use App\Models\Admin\Slider;
-use Litespeed\LSCache\LSCache;
 use App\Models\Admin\Tournament;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
+use Litespeed\LSCache\LSCache;
 
 class WebsiteService
 {
-
     public function getAllActiveClubs(): Collection
     {
         return Club::where('status', true)
-        ->where('id', '!=', 1) 
-        ->orderBy('sort')->get();
+            ->where('id', '!=', 1)
+            ->orderBy('sort')->get();
     }
 
     public function getAllInActiveClubs(): Collection
@@ -47,8 +44,9 @@ class WebsiteService
 
     public function getActiveNews()
     {
-        return  News::where('show', true)->orderBy('created_at', 'ASC')->get();
+        return News::where('show', true)->orderBy('created_at', 'ASC')->get();
     }
+
     public function getAllSliders()
     {
         return Slider::get();
@@ -60,6 +58,7 @@ class WebsiteService
         if ($tournament === null) {
             return Tournament::with('flyingDays')->latest()->first();
         }
+
         return $tournament;
     }
 
@@ -91,10 +90,12 @@ class WebsiteService
             ->orderBy('total', 'desc')
             ->get();
     }
+
     public function getTournamentTotalByDays($tournament)
     {
-        return (DB::table('player_tournament_total')->where('tournament_id', $tournament->id)->get())->groupBy('player_id');
+        return DB::table('player_tournament_total')->where('tournament_id', $tournament->id)->get()->groupBy('player_id');
     }
+
     public function getAllClubTournamentsWithPrizes($tournaments)
     {
         $data = [];
@@ -108,10 +109,11 @@ class WebsiteService
                 $data[$tournament->id][$player->id] = [$player->name, $player->city, $sortedPlayer->total, $prizes[$key]['name']];
             }
         }
+
         return collect($data);
     }
 
-    public static function flushCache($tournament_id=null,$date=null,$club_id=null): void
+    public static function flushCache($tournament_id = null, $date = null, $club_id = null): void
     {
         if ($tournament_id && $date && $club_id) {
             $routes = [];
@@ -135,8 +137,9 @@ class WebsiteService
             $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
             $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
 
-            $paths = array_map(function($url) {
+            $paths = array_map(function ($url) {
                 $path = str_replace(url('/'), '', $url);
+
                 return empty($path) ? '/' : $path;
             }, $routes);
 
@@ -154,49 +157,52 @@ class WebsiteService
             LSCache::purgeAll();
             opcache_reset();
             Cache::store('remember_forever_cache_store')->flush();
-            
+
         }
     }
+
     public function getPreviousDay($tournament, $resultDate)
     {
 
         try {
-            return $tournament->flyingDays->filter(fn($item) => $item->date < $resultDate)
-            ->sortByDesc('date')
-            ->first();
+            return $tournament->flyingDays->filter(fn ($item) => $item->date < $resultDate)
+                ->sortByDesc('date')
+                ->first();
         } catch (\Throwable $th) {
             dump($th->getMessage());
         }
 
     }
+
     public function getPreviousDayShortPigeons($tournament, $previousDay)
     {
         try {
             if (empty($previousDay) || $tournament->type === 'OPEN') {
                 return null;
             }
+
             return Cache::remember('shortPigeons-'.$tournament->id.'-'.$previousDay->date, now()->addMinutes(60), function () use ($tournament, $previousDay) {
                 return Result::where(function ($query) {
                     $query->whereNull('pigeon_time')
                         ->orWhere('pigeon_time', '00:00:00');
                 })
-                ->where('date', $previousDay->date)
-                ->where('tournament_id', $tournament->id)
-                ->get();
+                    ->where('date', $previousDay->date)
+                    ->where('tournament_id', $tournament->id)
+                    ->get();
 
             });
         } catch (\Throwable $th) {
             dump($th->getMessage());
         }
-        
+
     }
-    
+
     /**
      * Store URLs in Redis for cache clearing
      * This method handles duplicates and stores URLs without Laravel's prefix
-     * 
-     * @param array $urls Array of URLs to be cached for clearing
-     * @param string $redisKey The Redis key to store URLs (default: 'cache_clear_urls')
+     *
+     * @param  array  $urls  Array of URLs to be cached for clearing
+     * @param  string  $redisKey  The Redis key to store URLs (default: 'cache_clear_urls')
      * @return int|void Number of URLs actually added (excluding duplicates)
      */
     public static function storeUrlsForCacheClearing(array $urls, string $redisKey = 'cache_clear_urls')
@@ -204,7 +210,7 @@ class WebsiteService
         if (empty($urls)) {
             return 0;
         }
-        Redis::connection('central_keys')->sadd($redisKey,...$urls);
-        
+        Redis::connection('central_keys')->sadd($redisKey, ...$urls);
+
     }
 }
