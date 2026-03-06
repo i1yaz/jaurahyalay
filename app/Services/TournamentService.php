@@ -335,6 +335,24 @@ class TournamentService
         ];
     }
 
+    // Additional helper methods for better code organization
+    private function validateTournamentData(Request $request): void
+    {
+        // Add validation logic here if needed
+        // This could include business rule validations
+    }
+
+    private function logTournamentUpdate(Tournament $tournament, array $changes): void
+    {
+        Log::info('Tournament updated successfully', [
+            'tournament_id' => $tournament->id,
+            'tournament_name' => $tournament->name,
+            'changes' => $changes
+        ]);
+    }
+
+
+
     public function storePoster(Request $request, Tournament $tournament, $type = 'create'): void
     {
         if ($request->hasFile('poster')) {
