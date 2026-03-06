@@ -13,7 +13,6 @@ use App\Models\Admin\Tournament;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Database\Eloquent\Collection;
 
 class WebsiteService
@@ -53,24 +52,47 @@ class WebsiteService
     public static function flushCache($tournament_id=null,$date=null,$club_id=null): void
     {
         if ($tournament_id && $date && $club_id) {
-            $route = [];
+            $routes = [];
+
+            // Home page
+            $routes[] = route('root');
+
+            // Club index page
+            $routes[] = route('result.club', ['club' => $club_id]);
+            $routes[] = route('result.club', ['club' => 'default']);
+
+            // Tournament load pages
+            $routes[] = route('result.tournament', ['club_id' => $club_id, 'tournament_id' => $tournament_id]);
+            $routes[] = route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament_id]);
+
+            // Tournament specific date pages
+            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => $date]);
+            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => $date]);
+
+            // Tournament total pages
+            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
+            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
+
+            $paths = array_map(function($url) {
+                $path = str_replace(url('/'), '', $url);
+                return empty($path) ? '/' : $path;
+            }, $routes);
+
             try {
-                Cache::flush();
-                LSCache::purgeAll();
+                // Stale while revalidate purge in LiteSpeed exclusively for the URIs that changed
+                LSCache::purgeItems($paths, true); // true sets the "stale," prefix
             } catch (\Exception $e) {
                 Cache::flush();
-            }
-            $route[] = route('result.club', ['club' => $club_id], true);
-            $route[] = route('result.tournament', ['club_id' => $club_id, 'tournament_id' => $tournament_id], true);
-            $route[] = route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament_id], true);
-            $route[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => $date], true);
-            $route[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total'], true);
-            self::storeUrlsForCacheClearing($route);
-        }else {
-                opcache_reset();
-                Cache::flush();
-                Cache::store('remember_forever_cache_store')->flush();
                 LSCache::purgeAll();
+            }
+
+            self::storeUrlsForCacheClearing($routes);
+        } else {
+            Cache::flush();
+            LSCache::purgeAll();
+            opcache_reset();
+            Cache::store('remember_forever_cache_store')->flush();
+            
         }
     }
     
