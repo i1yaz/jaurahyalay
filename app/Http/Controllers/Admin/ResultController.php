@@ -72,12 +72,12 @@ class ResultController extends Controller
                 $data = explode('_', $request->pk);
                 $tournament = Tournament::find($data[0]);
                 $club_id = $tournament ? $tournament->club_id : null;
-                $headers = WebsiteService::flushCache($data[0], $data[1], $club_id);
+                WebsiteService::flushCache($data[0], $data[1], $club_id);
                 $time = $request->value;
             }catch (\Exception $e){
                 return response()->json($e->getMessage());
             }
-            return response()->json($result)->withHeaders($headers);
+            return response()->json($result);
         }
         return response()->json('Sorry You don\'t have permission!');
     }
@@ -109,8 +109,8 @@ class ResultController extends Controller
 
                 $result = (new ResultService())->updateStartTime($requestData,$data);
             }
-            $headers = WebsiteService::flushCache($request->tournament_id,$date,$request->club_id);
-            return redirect()->back()->with('success', 'Time has been updated!')->withHeaders($headers);
+            WebsiteService::flushCache($request->tournament_id,$date,$request->club_id);
+            return redirect()->back()->with('success', 'Time has been updated!');
         }
         return redirect()->back()->withErrors('You dont\'t have Permissions!');
     }

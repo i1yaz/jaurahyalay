@@ -27,12 +27,22 @@ use Illuminate\Support\Facades\Route;
 */
 Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], function() {
     Route::get('/refresh', [WebsiteController::class,'refresh'])->name('refresh');
-    Route::get('/', [WebsiteController::class,'index'])->name('root');
+    Route::get('/', [WebsiteController::class,'index'])->name('root')->middleware('lstags:home');
     Route::get('/weather', [WebsiteController::class,'weather'])->name('weather');
     Route::get('/contact', [WebsiteController::class,'contact'])->name('contact');
-    Route::get('/result/{club}', [WebsiteController::class,'clubResult'])->name('result.club'); //navbar
-    Route::get('/result/{club_id}/{tournament_id}', [WebsiteController::class,'loadTournament'])->name('result.tournament'); //load a tournament//
-    Route::get('/result/{club}/{tournament}/{date}', [WebsiteController::class,'tournamentDateResult'])->name('result.tournament.date'); //result
+    
+    // Tagging club routes so they can be invalidated broadly
+    Route::get('/result/{club}', [WebsiteController::class,'clubResult'])
+        ->name('result.club')
+        ->middleware('lstags:club,tournament'); 
+        
+    Route::get('/result/{club_id}/{tournament_id}', [WebsiteController::class,'loadTournament'])
+        ->name('result.tournament')
+        ->middleware('lstags:tournament'); 
+        
+    Route::get('/result/{club}/{tournament}/{date}', [WebsiteController::class,'tournamentDateResult'])
+        ->name('result.tournament.date')
+        ->middleware('lstags:tournament,date'); 
 });
 
 Auth::routes(['verify' => true]);

@@ -116,6 +116,12 @@ class WebsiteService
     public static function flushCache($tournament_id = null, $date = null, $club_id = null)
     {
         if ($tournament_id && $date && $club_id) {
+
+            // Clear specific Laravel backend caches so background builder doesn't fetch old DB results
+            Cache::forget('firstActiveTournament');
+            Cache::forget('shortPigeons-'.$tournament_id.'-'.$date);
+            Cache::store('remember_forever_cache_store')->forget('tournament-date-result-'.$tournament_id);
+
             $routes = [];
 
             // Home page
@@ -143,14 +149,15 @@ class WebsiteService
                 return empty($path) ? '/' : $path;
             }, $routes);
 
+            try {
+                // Purge by tags instead of specific URIs to ensure LiteSpeed catches all variations
+                LSCache::purgeTags(['home', 'club', 'tournament', 'date'], true);
+            } catch (\Exception $e) {
+                Cache::flush();
+                LSCache::purgeAll();
+            }
+
             self::storeUrlsForCacheClearing($routes);
-
-            // Return headers array so the controller can attach it to the Laravel response
-            $items = implode(',', $paths);
-
-            return [
-                'X-LiteSpeed-Purge' => 'stale,'.$items,
-            ];
         } else {
             Cache::flush();
             try {
@@ -159,8 +166,6 @@ class WebsiteService
             }
             opcache_reset();
             Cache::store('remember_forever_cache_store')->flush();
-
-            return [];
         }
     }
 
