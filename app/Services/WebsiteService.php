@@ -150,8 +150,16 @@ class WebsiteService
             }, $routes);
 
             try {
-                // Purge by tags instead of specific URIs to ensure LiteSpeed catches all variations
-                LSCache::purgeTags(['home', 'club', 'tournament', 'date'], true);
+                // Purge specific dynamic tags instead of generic URIs to ensure LiteSpeed targets precisely
+                $tags = [
+                    'home', 
+                    'club-'.$club_id, 
+                    'club-default', 
+                    'tournament-'.$tournament_id, 
+                    'date-'.$date, 
+                    'date-total'
+                ];
+                LSCache::purgeTags($tags, true);
             } catch (\Exception $e) {
                 Cache::flush();
                 LSCache::purgeAll();
