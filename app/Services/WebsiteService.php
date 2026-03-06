@@ -152,12 +152,12 @@ class WebsiteService
             try {
                 // Purge specific dynamic tags instead of generic URIs to ensure LiteSpeed targets precisely
                 $tags = [
-                    'home', 
-                    'club-'.$club_id, 
-                    'club-default', 
-                    'tournament-'.$tournament_id, 
-                    'date-'.$date, 
-                    'date-total'
+                    'home',
+                    'club-'.$club_id,
+                    'club-default',
+                    'tournament-'.$tournament_id,
+                    'date-'.$date,
+                    'date-total',
                 ];
                 LSCache::purgeTags($tags, true);
             } catch (\Exception $e) {

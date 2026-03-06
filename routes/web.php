@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], function () {
     Route::get('/refresh', [WebsiteController::class, 'refresh'])->name('refresh');
-    Route::get('/', [WebsiteController::class, 'index'])->name('root')->middleware('lstags:home');
+    Route::get('/', [WebsiteController::class, 'index'])->name('root')->middleware('dynamic_lstags:home');
     Route::get('/weather', [WebsiteController::class, 'weather'])->name('weather');
     Route::get('/contact', [WebsiteController::class, 'contact'])->name('contact');
 
@@ -35,15 +35,15 @@ Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], functio
     // Uses the Route parameters directly in the tag name
     Route::get('/result/{club}', [WebsiteController::class, 'clubResult'])
         ->name('result.club')
-        ->middleware('lstags:club,club-{club}');
+        ->middleware('dynamic_lstags:club,club-{club}');
 
     Route::get('/result/{club_id}/{tournament_id}', [WebsiteController::class, 'loadTournament'])
         ->name('result.tournament')
-        ->middleware('lstags:tournament-{tournament_id}');
+        ->middleware('dynamic_lstags:tournament-{tournament_id}');
 
     Route::get('/result/{club}/{tournament}/{date}', [WebsiteController::class, 'tournamentDateResult'])
         ->name('result.tournament.date')
-        ->middleware('lstags:tournament-{tournament},date-{date}');
+        ->middleware('dynamic_lstags:tournament-{tournament},date-{date}');
 });
 
 Auth::routes(['verify' => true]);
