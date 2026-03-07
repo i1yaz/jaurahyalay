@@ -35,7 +35,7 @@ Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], functio
     // Uses the Route parameters directly in the tag name
     Route::get('/result/{club}', [WebsiteController::class, 'clubResult'])
         ->name('result.club')
-        ->middleware('dynamic_lstags:club,club-{club}');
+        ->middleware('dynamic_lstags:club-{club}');
 
     Route::get('/result/{club_id}/{tournament_id}', [WebsiteController::class, 'loadTournament'])
         ->name('result.tournament')
@@ -43,7 +43,7 @@ Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], functio
 
     Route::get('/result/{club}/{tournament}/{date}', [WebsiteController::class, 'tournamentDateResult'])
         ->name('result.tournament.date')
-        ->middleware('dynamic_lstags:tournament-{tournament},date-{date}');
+        ->middleware('dynamic_lstags:tournament-{tournament}-date-{date}');
 });
 
 Auth::routes(['verify' => true]);

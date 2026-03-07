@@ -40,6 +40,13 @@ class DynamicLSTags
         if (count($parsedTags) > 0) {
             $lscache_string = implode(',', $parsedTags);
 
+            // Log tags for verification/debugging in a Redis set for easy CLI access
+            try {
+                \Illuminate\Support\Facades\Redis::connection('central_keys')->sadd('visited_lscache_tags', ...$parsedTags);
+            } catch (\Exception $e) {
+                // Fail silently to avoid breaking the request if Redis is down
+            }
+
             if ($response->headers->has('X-LiteSpeed-Tag')) {
                 $existing = $response->headers->get('X-LiteSpeed-Tag');
                 $response->headers->set('X-LiteSpeed-Tag', $existing.','.$lscache_string);
