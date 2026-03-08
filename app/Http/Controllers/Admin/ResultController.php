@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Admin\Result;
 use Illuminate\Http\Request;
 use App\Models\Admin\Tournament;
-use Facades\App\Services\WebsiteService;
+use App\Services\WebsiteService;
 use Illuminate\Support\Facades\DB;
 use App\Services\TournamentService;
 use Illuminate\Support\Facades\Log;
@@ -17,9 +17,12 @@ use Illuminate\Support\Facades\Cache;
 class ResultController extends Controller
 {
 
-    public function __construct()
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
     {
         $this->middleware('auth');
+        $this->websiteService = $websiteService;
     }
 
     public function index()
@@ -35,7 +38,7 @@ class ResultController extends Controller
     public function refresh()
     {
         if (Auth::user()->super_admin) {
-            WebsiteService::flushCache();
+            $this->websiteService->flushCache();
             return redirect('admin/result')->with('success', 'System refreshed!');
         }
         abort(403);
@@ -72,7 +75,7 @@ class ResultController extends Controller
                 $data = explode('_', $request->pk);
                 $tournament = Tournament::find($data[0]);
                 $club_id = $tournament ? $tournament->club_id : null;
-                WebsiteService::flushCache($data[0], $data[1], $club_id);
+                $this->websiteService->flushCache($data[0], $data[1], $club_id);
                 $time = $request->value;
             }catch (\Exception $e){
                 return response()->json($e->getMessage());
@@ -109,7 +112,7 @@ class ResultController extends Controller
 
                 $result = (new ResultService())->updateStartTime($requestData,$data);
             }
-            WebsiteService::flushCache($request->tournament_id,$date,$request->club_id);
+            $this->websiteService->flushCache($request->tournament_id,$date,$request->club_id);
             return redirect()->back()->with('success', 'Time has been updated!');
         }
         return redirect()->back()->withErrors('You dont\'t have Permissions!');

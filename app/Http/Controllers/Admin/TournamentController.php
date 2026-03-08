@@ -13,9 +13,12 @@ use Illuminate\Support\Facades\Auth;
 class TournamentController extends Controller
 {
     // Middleware for Admin
-    public function __construct()
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
     {
         $this->middleware('auth');
+        $this->websiteService = $websiteService;
     }
     /**
      * Display a listing of the resource.
@@ -50,7 +53,7 @@ class TournamentController extends Controller
         $tournament = (new TournamentService())->storeTournament($request);
         (new TournamentService())->storePoster($request, $tournament);
         (new TournamentService())->syncTournamentModerator($request, $tournament);
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         return redirect('admin/tournament')->with('success', 'Tournament has been added!');
     }
 
@@ -78,14 +81,14 @@ class TournamentController extends Controller
         $tournament = (new TournamentService())->updateTournament($request, $tournament);
         (new TournamentService())->storePoster($request, $tournament,'update');
         (new TournamentService())->syncTournamentModerator($request, $tournament);
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         return redirect('admin/tournament')->with('success', 'Tournament has been updated!');
     }
 
     public function destroy(Tournament $tournament)
     {
         if ($tournament->delete()) {
-            WebsiteService::flushCache();
+            $this->websiteService->flushCache();
             return redirect()->back()->with('success', 'Tournament has been deleted!');
         } else {
             return redirect()->back()->withErrors('Something is wrong!');
@@ -98,7 +101,7 @@ class TournamentController extends Controller
         }
         $tournament->status = !$tournament->status;
         if ($tournament->save()) {
-            WebsiteService::flushCache();
+            $this->websiteService->flushCache();
             return redirect()->back()->with('success', 'Tournament status has been updated!');
         } else {
             return redirect()->back()->withErrors('Something is wrong!');

@@ -15,9 +15,12 @@ use App\Http\Requests\validateTournament;
 class TournamentController extends Controller
 {
     // Middleware for Admin
-    public function __construct()
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
     {
         $this->middleware('auth');
+        $this->websiteService = $websiteService;
     }
     /**
      * Display a listing of the resource.
@@ -56,7 +59,7 @@ class TournamentController extends Controller
         $tournament = (new TournamentService())->storeTournament($request);
         (new TournamentService())->storePoster($request, $tournament);
         (new TournamentService())->syncTournamentModerator($request, $tournament);
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         return redirect('club/admin/tournament')->with('success', 'Tournament has been added!');
     }
 
@@ -85,7 +88,7 @@ class TournamentController extends Controller
         $tournament = (new TournamentService())->updateTournament($request, $tournament);
         (new TournamentService())->storePoster($request, $tournament,'update');
         (new TournamentService())->syncTournamentModerator($request, $tournament);
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         return redirect('club/admin/tournament')->with('success', 'Tournament has been updated!');
     }
 
@@ -93,7 +96,7 @@ class TournamentController extends Controller
     {
         if ($tournament->club_id === Auth::user()->club_id) {
             $tournament->delete();
-            WebsiteService::flushCache();
+            $this->websiteService->flushCache();
             return redirect()->back()->with('success', 'Tournament has been deleted!');
         } else {
             return redirect()->back()->withErrors('Something is wrong!');

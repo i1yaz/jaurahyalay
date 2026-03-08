@@ -12,9 +12,12 @@ class WebsiteController extends Controller
 {
 
     // Middleware for Admin
-    public function __construct()
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
     {
         $this->middleware('auth');
+        $this->websiteService = $websiteService;
     }
 
     public function index()
@@ -34,7 +37,7 @@ class WebsiteController extends Controller
             'sliders.*' => 'file|image'
         ]);
         $response = (new TournamentService())->storeSliders($request);
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         if ($response) {
             return redirect('admin/website')->with('success', 'Sliders has been added!');
         } else {
@@ -50,7 +53,7 @@ class WebsiteController extends Controller
                 'value' => $request->auto_update_time
             ]
         );
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         if ($response) {
             return redirect('admin/website')->with('success', 'Setting has been saved!');
         } else {
@@ -79,7 +82,7 @@ class WebsiteController extends Controller
                 'description' => "Last Winner Condition",
             ]
         );
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         if ($response1 && $response2) {
             return redirect('admin/website')->with('success', 'Setting has been saved!');
         } else {

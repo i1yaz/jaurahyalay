@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Website;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Club;
 use App\Models\Admin\Tournament;
-use Facades\App\Services\WebsiteService;
+use App\Services\WebsiteService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Cache;
@@ -13,23 +13,30 @@ use Illuminate\Support\Facades\View as FacadeView;
 
 class WebsiteController extends Controller
 {
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
+    {
+        $this->websiteService = $websiteService;
+    }
+
     public function index()
     {
         $title = 'Home';
         $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
-            return WebsiteService::getFirstActiveTournamentForIndex();
+            return $this->websiteService->getFirstActiveTournamentForIndex();
 
         });
 
         $resultDate = $this->isTodayFlyingDay($firstActiveTournament);
         if ($firstActiveTournament != null && $resultDate != 'total') {
-            $tournament = WebsiteService::getTournamentResultByDateForIndex($firstActiveTournament, $resultDate);
-            $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($firstActiveTournament, $resultDate);
+            $tournament = $this->websiteService->getTournamentResultByDateForIndex($firstActiveTournament, $resultDate);
+            $sortedResultAndPlayers = $this->websiteService->getSortedResultByDate($firstActiveTournament, $resultDate);
             $players = $tournament->tournamentResult->groupBy('player_id');
             $IndexView = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } elseif ($firstActiveTournament != null && $resultDate == 'total') {
-            $sortedResultAndPlayers = WebsiteService::getTournamentTotal($firstActiveTournament);
-            $players = WebsiteService::getTournamentTotalByDays($firstActiveTournament);
+            $sortedResultAndPlayers = $this->websiteService->getTournamentTotal($firstActiveTournament);
+            $players = $this->websiteService->getTournamentTotalByDays($firstActiveTournament);
             $tournament = $firstActiveTournament;
             $IndexView = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         }
@@ -44,8 +51,8 @@ class WebsiteController extends Controller
             $page = 1;
         }
         $title = $club->name;
-        $tournaments = WebsiteService::getAllTournamentsOfThisClub($club);
-        $tournamentsPositions = WebsiteService::getAllClubTournamentsWithPrizes($tournaments);
+        $tournaments = $this->websiteService->getAllTournamentsOfThisClub($club);
+        $tournamentsPositions = $this->websiteService->getAllClubTournamentsWithPrizes($tournaments);
         $clubResultIndexView = (string) FacadeView::make('website.club.index', compact('club', 'tournaments', 'tournamentsPositions', 'title'));
 
         return $clubResultIndexView;
@@ -65,14 +72,14 @@ class WebsiteController extends Controller
             if ($date !== 'total') {
                 set_time_limit(300);
                 $resultDate = $date;
-                $tournament = WebsiteService::getTournamentResultByDateForIndex($tournament, $resultDate);
-                $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($tournament, $resultDate);
+                $tournament = $this->websiteService->getTournamentResultByDateForIndex($tournament, $resultDate);
+                $sortedResultAndPlayers = $this->websiteService->getSortedResultByDate($tournament, $resultDate);
                 $players = $tournament->tournamentResult->groupBy('player_id');
                 $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
             } else {
                 set_time_limit(300);
-                $sortedResultAndPlayers = WebsiteService::getTournamentTotal($tournament);
-                $players = WebsiteService::getTournamentTotalByDays($tournament);
+                $sortedResultAndPlayers = $this->websiteService->getTournamentTotal($tournament);
+                $players = $this->websiteService->getTournamentTotalByDays($tournament);
                 $resultDate = $date;
                 $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
 
@@ -84,14 +91,14 @@ class WebsiteController extends Controller
         if ($date !== 'total') {
             set_time_limit(300);
             $resultDate = $date;
-            $tournament = WebsiteService::getTournamentResultByDateForIndex($tournament, $resultDate);
-            $sortedResultAndPlayers = WebsiteService::getSortedResultByDate($tournament, $resultDate);
+            $tournament = $this->websiteService->getTournamentResultByDateForIndex($tournament, $resultDate);
+            $sortedResultAndPlayers = $this->websiteService->getSortedResultByDate($tournament, $resultDate);
             $players = $tournament->tournamentResult->groupBy('player_id');
             $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } else {
             set_time_limit(300);
-            $sortedResultAndPlayers = WebsiteService::getTournamentTotal($tournament);
-            $players = WebsiteService::getTournamentTotalByDays($tournament);
+            $sortedResultAndPlayers = $this->websiteService->getTournamentTotal($tournament);
+            $players = $this->websiteService->getTournamentTotalByDays($tournament);
             $resultDate = $date;
             $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         }
@@ -162,7 +169,7 @@ class WebsiteController extends Controller
 
     public function refresh()
     {
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         dd('System has been updated');
     }
 

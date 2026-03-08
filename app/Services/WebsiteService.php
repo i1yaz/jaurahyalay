@@ -113,7 +113,7 @@ class WebsiteService
         return collect($data);
     }
 
-    public static function flushCache($tournament_id = null, $date = null, $club_id = null)
+    public function flushCache($tournament_id = null, $date = null, $club_id = null)
     {
         if ($tournament_id && $date && $club_id) {
             $routes = [];
@@ -145,7 +145,7 @@ class WebsiteService
 
             try {
                 $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
-                    return WebsiteService::getFirstActiveTournamentForIndex();
+                    return $this->getFirstActiveTournamentForIndex();
 
                 }); 
 
@@ -167,7 +167,7 @@ class WebsiteService
                 LSCache::purgeAll();
             }
 
-            self::storeUrlsForCacheClearing($routes);
+            $this->storeUrlsForCacheClearing($routes);
         } else {
             Cache::flush();
             try {
@@ -223,7 +223,7 @@ class WebsiteService
      * @param  string  $redisKey  The Redis key to store URLs (default: 'cache_clear_urls')
      * @return int|void Number of URLs actually added (excluding duplicates)
      */
-    public static function storeUrlsForCacheClearing(array $urls, string $redisKey = 'cache_clear_urls')
+    public function storeUrlsForCacheClearing(array $urls, string $redisKey = 'cache_clear_urls')
     {
         if (empty($urls)) {
             return 0;

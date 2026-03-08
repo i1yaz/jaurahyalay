@@ -12,7 +12,7 @@ trait Loggable
     public static function bootLoggable()
     {
         static::saved(function ($model) {
-            WebsiteService::flushCache();
+            resolve(WebsiteService::class)->flushCache();
         });
         static::created(static function ($model) {
             if (!$model instanceof Result) {

@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Storage;
 class PlayerController extends Controller
 {
     // Middleware for Admin
-    public function __construct()
+    protected $websiteService;
+
+    public function __construct(WebsiteService $websiteService)
     {
         $this->middleware('auth');
+        $this->websiteService = $websiteService;
     }
 
     public function index()
@@ -42,7 +45,7 @@ class PlayerController extends Controller
         $request->merge(['club' => Auth::user()->club_id]);
         $player = (new TournamentService())->storePlayer($request);
          (new TournamentService())->storePlayerPicture($request, $player);
-         WebsiteService::flushCache();
+         $this->websiteService->flushCache();
         if ($player) {
             return redirect('club/admin/player/create')->with('success', 'Player has been added!');
         } else {
@@ -64,7 +67,7 @@ class PlayerController extends Controller
         $request->merge(['club' => Auth::user()->club_id]);
         $player = (new TournamentService())->updatePlayer($request, $player);
         (new TournamentService())->storePlayerPicture($request, $player,'update');
-        WebsiteService::flushCache();
+        $this->websiteService->flushCache();
         return redirect('club/admin/player')->with('success', 'Player has been updated!');
     }
 
