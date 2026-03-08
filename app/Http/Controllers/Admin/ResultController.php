@@ -71,15 +71,13 @@ class ResultController extends Controller
             $chunks = str_split($result, 2);
             //Convert array to string.  Each element separated by the given separator.
             $result = implode(':', $chunks);
-            try {
-                $data = explode('_', $request->pk);
-                $tournament = Tournament::find($data[0]);
-                $club_id = $tournament ? $tournament->club_id : null;
-                $this->websiteService->flushCache($data[0], $data[1], $club_id);
-                $time = $request->value;
-            }catch (\Exception $e){
-                return response()->json($e->getMessage());
-            }
+            // try {
+            //     $data = explode('_', $request->pk);
+            //     $this->websiteService->flushCache($data[0],$data[1],end($data));
+            //     $time = $request->value;
+            // }catch (\Exception $e){
+            //     return response()->json($e->getMessage());
+            // }
             return response()->json($result);
         }
         return response()->json('Sorry You don\'t have permission!');

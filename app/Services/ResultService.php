@@ -17,6 +17,12 @@ class ResultService
     private const AUTO_UPDATE_TIME_KEY = 'auto_update_time';
     private const TIME_PADDING_LENGTH = 6;
     private const EMPTY_TIME_VALUES = ['00:00:00', '000000', '0000', '00:00', '00', null];
+    protected $websiteService;
+
+    public function __construct()
+    {
+        $this->websiteService = new WebsiteService();
+    }
 
     /**
      * Update player time based on request data
@@ -90,7 +96,8 @@ class ResultService
     {
         [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
 
-        $tournaments = Result::select('tournament_id')
+        $tournaments = Result::select(['tournament_id','club_id'])
+            ->join('tournaments', 'results.tournament_id', '=', 'tournaments.id')
             ->where('date', $date)
             ->where('player_id', $playerId)
             ->where('pigeon_number', $pigeonNumber)
@@ -99,6 +106,7 @@ class ResultService
         foreach ($tournaments as $tournament) {
             $modifiedData = $parsedData;
             $modifiedData[0] = $tournament->tournament_id;
+            $modifiedData[5] = $tournament->club_id;
             $this->updatePigeonTime($requestData, $modifiedData);
         }
     }
@@ -110,7 +118,8 @@ class ResultService
     {
         [$tournamentId, $date, $playerId] = $parsedData;
 
-        $tournaments = Result::select('tournament_id')
+        $tournaments = Result::select(['tournament_id','club_id'])
+            ->join('tournaments','results.tournament_id','=','tournaments.id')
             ->where('date', $date)
             ->where('player_id', $playerId)
             ->get();
@@ -118,6 +127,7 @@ class ResultService
         foreach ($tournaments as $tournament) {
             $modifiedData = $parsedData;
             $modifiedData[0] = $tournament->tournament_id;
+            $modifiedData[5] = $tournament->club_id;
             $this->updateStartTime($requestData, $modifiedData);
         }
     }
@@ -127,7 +137,7 @@ class ResultService
      */
     private function updatePigeonTime(array $requestData, array $parsedData): string
     {
-        [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
+        [$tournamentId, $date, $playerId, $pigeonNumber,$club_id] = $parsedData;
         $formattedTime = $this->formatTimeValue($requestData['value']);
 
         $result = $this->findResult($tournamentId, $date, $playerId, $pigeonNumber);
@@ -139,7 +149,7 @@ class ResultService
         }
 
         $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
-
+        $this->websiteService->flushCache($tournamentId, $date, $club_id);
         return $requestData['value'];
     }
 
@@ -148,7 +158,7 @@ class ResultService
      */
     public function updateStartTime(array $requestData, array $parsedData): string
     {
-        [$tournamentId, $date, $playerId] = $parsedData;
+        [$tournamentId, $date, $playerId,$club_id] = $parsedData;
         $formattedTime = $this->formatTimeValue($requestData['value']);
 
         $result = $this->findPlayerTournamentResult($tournamentId, $date, $playerId);
@@ -160,7 +170,7 @@ class ResultService
         }
 
         $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
-
+        $this->websiteService->flushCache($tournamentId, $date, $club_id);
         return $requestData['value'];
     }
 
