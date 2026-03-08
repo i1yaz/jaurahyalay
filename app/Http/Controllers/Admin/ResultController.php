@@ -84,7 +84,7 @@ class ResultController extends Controller
     }
     public function updateResult(Request $request)
     {
-
+        
         $response = (new ResultService())->canEditThisResult($request);
  
         if ($response) {
@@ -107,7 +107,7 @@ class ResultController extends Controller
                     'value' => $result->start_time
                 ];
                 $request->merge(['value' => $result->start_time]);
-
+                $data[3] = $request->club_id;
                 $result = (new ResultService())->updateStartTime($requestData,$data);
             }
             $this->websiteService->flushCache($request->tournament_id,$date,$request->club_id);
