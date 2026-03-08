@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Admin\Result;
 use Illuminate\Http\Request;
 use App\Models\Admin\Tournament;
-use App\Services\WebsiteService;
+use Facades\App\Services\WebsiteService;
 use Illuminate\Support\Facades\DB;
 use App\Services\TournamentService;
 use Illuminate\Support\Facades\Log;
