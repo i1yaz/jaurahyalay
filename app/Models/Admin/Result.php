@@ -4,11 +4,15 @@ namespace App\Models\Admin;
 
 use App\Abstracts\BaseModel;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Result extends BaseModel
 {
+    use HasFactory;
     protected $fillable = [
         'pigeon_number', 'pigeon_time', 'total_time',
-        'player_id', 'tournament_id','pigeon_total','time_in_seconds'
+        'player_id', 'tournament_id', 'pigeon_total', 'time_in_seconds',
+        'date', 'start_time'
     ];
     public function resultOfPlayer()
     {

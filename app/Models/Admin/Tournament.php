@@ -4,8 +4,11 @@ namespace App\Models\Admin;
 
 use App\Abstracts\BaseModel;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Tournament extends BaseModel
 {
+    use HasFactory;
     protected $fillable = [
         'name', 'days', 'status', 'show', 'pigeons',
         'start_date', 'start_time', 'supporter', 'club_id', 'poster', 'sort','type','public_hide',
