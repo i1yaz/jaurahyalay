@@ -179,6 +179,80 @@ class WebsiteService
         }
     }
 
+    public function flushCacheBatch(array $flushParams)
+    {
+        if (empty($flushParams)) {
+            return;
+        }
+        
+        $allRoutes = [];
+        $allTags = [];
+        $firstActiveTournament = null;
+        
+        try {
+            $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
+                return $this->getFirstActiveTournamentForIndex();
+            }); 
+        } catch (\Exception $e) {
+            // Ignore error here, we'll try to flush everything if LSCache fails later
+        }
+
+        foreach ($flushParams as $params) {
+            $tournament_id = $params['tournament_id'] ?? null;
+            $date = $params['date'] ?? null;
+            $club_id = $params['club_id'] ?? null;
+            
+            if (!$tournament_id || !$date || !$club_id) {
+                continue;
+            }
+            
+            // Home page
+            $allRoutes[] = route('root');
+
+            // Club index page
+            $allRoutes[] = route('result.club', ['club' => $club_id]);
+            $allRoutes[] = route('result.club', ['club' => 'default']);
+
+            // Tournament load pages
+            $allRoutes[] = route('result.tournament', ['club_id' => $club_id, 'tournament_id' => $tournament_id]);
+            $allRoutes[] = route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament_id]);
+
+            // Tournament specific date pages
+            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => $date]);
+            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => $date]);
+
+            // Tournament total pages
+            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
+            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
+
+            $allTags[] = 'club-'.$club_id;
+            $allTags[] = 'club-default';
+            $allTags[] = 'tournament-'.$tournament_id;
+            $allTags[] = 'tournament-'.$tournament_id.'-date-'.$date;
+            $allTags[] = 'tournament-'.$tournament_id.'-date-total';
+
+            if ($firstActiveTournament && $firstActiveTournament->id == $tournament_id) {
+                $allTags[] = 'home';
+            }
+        }
+        
+        $routes = array_unique($allRoutes);
+        $tags = array_values(array_unique($allTags));
+        
+        if (empty($routes) || empty($tags)) {
+            return;
+        }
+        
+        try {
+            LSCache::purgeTags($tags, true);
+        } catch (\Exception $e) {
+            Cache::flush();
+            LSCache::purgeAll();
+        }
+
+        $this->storeUrlsForCacheClearing($routes);
+    }
+
     public function getPreviousDay($tournament, $resultDate)
     {
 

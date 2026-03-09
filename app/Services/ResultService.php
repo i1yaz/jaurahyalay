@@ -18,6 +18,7 @@ class ResultService
     private const TIME_PADDING_LENGTH = 6;
     private const EMPTY_TIME_VALUES = ['00:00:00', '000000', '0000', '00:00', '00', null];
     protected $websiteService;
+    protected $pendingCacheFlushes = [];
 
     public function __construct()
     {
@@ -37,11 +38,15 @@ class ResultService
             'value' => $request->value
         ];
 
-        return match ($request->name) {
+        $result = match ($request->name) {
             self::PIGEON_TYPE => $this->handlePigeonTimeUpdate($requestData, $parsedData, $autoUpdateEnabled),
             self::START_TYPE => $this->handleStartTimeUpdate($requestData, $parsedData, $autoUpdateEnabled),
             default => 'nothing'
         };
+
+        $this->executePendingCacheFlushes();
+
+        return $result;
     }
 
     /**
@@ -149,7 +154,7 @@ class ResultService
         }
 
         $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
-        $this->websiteService->flushCache($tournamentId, $date, $club_id);
+        $this->deferCacheFlush($tournamentId, $date, $club_id);
         return $requestData['value'];
     }
 
@@ -170,7 +175,7 @@ class ResultService
         }
 
         $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
-        $this->websiteService->flushCache($tournamentId, $date, $club_id);
+        $this->deferCacheFlush($tournamentId, $date, $club_id);
         return $requestData['value'];
     }
 
@@ -314,10 +319,10 @@ class ResultService
     /**
      * Apply supporter logic to results
      */
-    private function applySupporterLogic(Tournament $tournament, int $landedCount, Collection $results): Collection
+    private function applySupporterLogic(Tournament $tournament, int $landedCount, Collection $results, bool $persist = true): Collection
     {
         if ($tournament->supporter > 0 && $landedCount > ($tournament->pigeons - $tournament->supporter)) {
-            return $this->processSupporterResults($tournament, $landedCount, $results);
+            return $this->processSupporterResults($tournament, $landedCount, $results, $persist);
         }
 
         return $results;
@@ -326,7 +331,7 @@ class ResultService
     /**
      * Process results when supporter logic applies
      */
-    private function processSupporterResults(Tournament $tournament, int $landedCount, Collection $results): Collection
+    private function processSupporterResults(Tournament $tournament, int $landedCount, Collection $results, bool $persist = true): Collection
     {
         $sortedResults = $results->sortBy('pigeon_total');
         $targetCount = $tournament->pigeons - $tournament->supporter;
@@ -334,8 +339,14 @@ class ResultService
 
         $resultsToZero = $sortedResults->take($excessCount);
 
-        foreach ($resultsToZero as $result) {
-            Result::where('id', $result->id)->update(['pigeon_total' => 0]);
+        if ($resultsToZero->isNotEmpty()) {
+            if ($persist) {
+                Result::whereIn('id', $resultsToZero->pluck('id'))->update(['pigeon_total' => 0]);
+            } else {
+                foreach ($resultsToZero as $result) {
+                    $result->pigeon_total = 0;
+                }
+            }
         }
 
         return $sortedResults->skip($excessCount);
@@ -372,20 +383,184 @@ class ResultService
             ->where('player_id', $playerId)
             ->get();
 
+        $upsertData = [];
+        
         foreach ($results as $result) {
             $newTotalTime = $this->calculateTotalTime($newStartTime, $result->pigeon_time);
-
-            Result::where('id', $result->id)->update([
+            
+            $upsertData[] = [
+                'id' => $result->id,
+                'player_id' => $result->player_id,
+                'tournament_id' => $result->tournament_id,
+                'date' => $result->date,
+                'pigeon_number' => $result->pigeon_number,
                 'start_time' => $newStartTime,
+                'pigeon_time' => $result->pigeon_time,
                 'pigeon_total' => $newTotalTime,
-                'time_in_seconds' => $newTotalTime
-            ]);
+                'time_in_seconds' => $newTotalTime,
+            ];
         }
+
+        if (!empty($upsertData)) {
+            // Because there's no native "batch update by ID" in Laravel without firing N queries, 
+            // and upsert requires a unique index match. The unique index is [player_id, tournament_id, date, pigeon_number].
+            Result::upsert(
+                $upsertData,
+                ['player_id', 'tournament_id', 'date', 'pigeon_number'],
+                ['start_time', 'pigeon_total', 'time_in_seconds']
+            );
+        }
+    }
+
+    /**
+     * Bulk recalculate all players for a specific tournament and date
+     * Fixing N+1 queries when updating start time from auto-recovery
+     */
+    public function bulkRecalculateForTournament(string $tournamentId, string $date, string $clubId): void
+    {
+        $tournament = Tournament::find($tournamentId);
+        if (!$tournament) {
+            return;
+        }
+
+        // Fetch all pigeon 1 records (which contain the target start times) for this tournament/date
+        $startTimes = Result::where('tournament_id', $tournamentId)
+            ->where('date', $date)
+            ->where('pigeon_number', 1)
+            ->whereNotNull('start_time')
+            ->pluck('start_time', 'player_id');
+
+        // Fetch ALL results for this tournament+date
+        $allResults = Result::where('tournament_id', $tournamentId)
+            ->where('date', $date)
+            ->get()
+            ->groupBy('player_id');
+
+        $upsertData = [];
+        $totalUpsertData = [];
+
+        foreach ($allResults as $playerId => $playerResults) {
+            if (!$startTimes->has($playerId)) {
+                continue;
+            }
+
+            $newStartTime = $startTimes[$playerId];
+            
+            // First pass: update times
+            foreach ($playerResults as $result) {
+                $newTotalTime = $this->calculateTotalTime($newStartTime, $result->pigeon_time);
+                
+                $result->start_time = $newStartTime;
+                $result->pigeon_total = $newTotalTime;
+                $result->time_in_seconds = $newTotalTime;
+
+                $upsertData[] = [
+                    'id' => $result->id,
+                    'player_id' => $result->player_id,
+                    'tournament_id' => $result->tournament_id,
+                    'date' => $result->date,
+                    'pigeon_number' => $result->pigeon_number,
+                    'start_time' => $newStartTime,
+                    'pigeon_time' => $result->pigeon_time,
+                    'pigeon_total' => $newTotalTime,
+                    'time_in_seconds' => $newTotalTime,
+                ];
+            }
+
+            // Second pass: apply supporter logic directly on the collection without DB persisting
+            $validResults = $this->filterValidResults($playerResults);
+            $landedCount = $validResults->count();
+
+            $processedResults = $this->applySupporterLogic($tournament, $landedCount, $validResults, false);
+
+            $totalUpsertData[] = [
+                'tournament_id' => $tournamentId,
+                'date' => $date,
+                'player_id' => $playerId,
+                'landed' => $landedCount,
+                'total' => $processedResults->sum('pigeon_total')
+            ];
+            
+            // Sync zeroed pigeon_totals back to upsertData
+            // Since $playerResults objects were updated in applySupporterLogic, we just need to recreate the upsert payload
+            // Let's clear the previous entries for this player and rebuild them after supporter logic
+            $upsertData = array_filter($upsertData, function ($item) use ($playerId) {
+                return $item['player_id'] !== $playerId;
+            });
+            
+            foreach ($playerResults as $result) {
+                $upsertData[] = [
+                    'id' => $result->id,
+                    'player_id' => $result->player_id,
+                    'tournament_id' => $result->tournament_id,
+                    'date' => $result->date,
+                    'pigeon_number' => $result->pigeon_number,
+                    'start_time' => $newStartTime,
+                    'pigeon_time' => $result->pigeon_time,
+                    'pigeon_total' => $result->pigeon_total,
+                    'time_in_seconds' => $result->time_in_seconds,
+                ];
+            }
+        }
+
+        // Batch update all results
+        if (!empty($upsertData)) {
+            // Using chunks to avoid hitting MySQL placeholders limit if there are thousands of rows
+            foreach (array_chunk($upsertData, 500) as $chunk) {
+                Result::upsert(
+                    $chunk,
+                    ['player_id', 'tournament_id', 'date', 'pigeon_number'],
+                    ['start_time', 'pigeon_total', 'time_in_seconds']
+                );
+            }
+        }
+
+        // Batch update totals
+        if (!empty($totalUpsertData)) {
+            foreach (array_chunk($totalUpsertData, 500) as $chunk) {
+                DB::table('player_tournament_total')->upsert(
+                    $chunk,
+                    ['player_id', 'tournament_id', 'date'],
+                    ['landed', 'total']
+                );
+            }
+        }
+
+        $this->deferCacheFlush($tournamentId, $date, $clubId);
+        $this->executePendingCacheFlushes();
     }
     public function canEditThisResult($request)
     {
         $data = explode('_', $request->pk);
         $tournament_id =  $data[0];
         return (new TournamentService)->canEditThisTournament($tournament_id);
+    }
+
+    /**
+     * Defer cache flushes to be executed all at once
+     */
+    public function deferCacheFlush(string $tournamentId, string $date, string $clubId): void
+    {
+        $key = "{$tournamentId}_{$date}_{$clubId}";
+        if (!isset($this->pendingCacheFlushes[$key])) {
+            $this->pendingCacheFlushes[$key] = [
+                'tournament_id' => $tournamentId,
+                'date' => $date,
+                'club_id' => $clubId
+            ];
+        }
+    }
+
+    /**
+     * Execute any pending deferred cache flushes natively as a batch
+     */
+    public function executePendingCacheFlushes(): void
+    {
+        if (empty($this->pendingCacheFlushes)) {
+            return;
+        }
+
+        $this->websiteService->flushCacheBatch(array_values($this->pendingCacheFlushes));
+        $this->pendingCacheFlushes = [];
     }
 }

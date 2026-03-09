@@ -2,17 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Admin\Result;
-use Illuminate\Http\Request;
 use App\Models\Admin\Tournament;
+use Illuminate\Http\Request;
 use App\Services\WebsiteService;
-use Illuminate\Support\Facades\DB;
 use App\Services\TournamentService;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\ResultService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class ResultController extends Controller
 {
@@ -88,29 +84,14 @@ class ResultController extends Controller
         $response = (new ResultService())->canEditThisResult($request);
  
         if ($response) {
-
-            //0 => tournament_id, 1 => date, 2 => player_id, 3 => pigeon_no, 4 => club_id
-            $players = DB::table('player_tournament')->select(['player_id'])->where('tournament_id', $request->tournament_id)->get()->toArray();
-            if (empty($players)) {
-                return redirect()->back()->withErrors('No player found!');
-            }
             $date = $request->value;
-            foreach ($players as $player) {
-                $data[0] = $request->tournament_id;
-                $data[1] = $date;
-                $data[2] = $player->player_id;
-                $request->merge(['pk' => $request->tournament_id . '_' . $date . '_' . $player->player_id]) ;
+            
+            (new ResultService())->bulkRecalculateForTournament(
+                $request->tournament_id,
+                $date,
+                $request->club_id
+            );
 
-                $result = Result::select(['start_time'])->where('date', $date)->where('player_id', $player->player_id)->where('pigeon_number', 1)->first();
-                $requestData = [
-                    'name' => $request->name,
-                    'value' => $result->start_time
-                ];
-                $request->merge(['value' => $result->start_time]);
-                $data[3] = $request->club_id;
-                $result = (new ResultService())->updateStartTime($requestData,$data);
-            }
-            $this->websiteService->flushCache($request->tournament_id,$date,$request->club_id);
             return redirect()->back()->with('success', 'Time has been updated!');
         }
         return redirect()->back()->withErrors('You dont\'t have Permissions!');
