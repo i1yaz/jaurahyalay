@@ -206,9 +206,6 @@ class WebsiteService
                 continue;
             }
             
-            // Home page
-            $allRoutes[] = route('root');
-
             // Club index page
             $allRoutes[] = route('result.club', ['club' => $club_id]);
             $allRoutes[] = route('result.club', ['club' => 'default']);
@@ -232,7 +229,9 @@ class WebsiteService
             $allTags[] = 'tournament-'.$tournament_id.'-date-total';
 
             if ($firstActiveTournament && $firstActiveTournament->id == $tournament_id) {
+                // Home page
                 $allTags[] = 'home';
+                $allRoutes[] = route('root');
             }
         }
         
