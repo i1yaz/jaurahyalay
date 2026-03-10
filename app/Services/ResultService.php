@@ -97,47 +97,51 @@ class ResultService
     }
 
     /**
-     * Update pigeon times across all tournaments when auto-update is enabled
-     */
-    private function updatePlayerTournamentPigeonTimes(array $requestData, array $parsedData): void
-    {
-        [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
+ * Update pigeon times across all tournaments when auto-update is enabled
+ */
+private function updatePlayerTournamentPigeonTimes(array $requestData, array $parsedData): void
+{
+    [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
 
-        $tournaments = Result::select(['tournament_id','club_id'])
-            ->join('tournaments', 'results.tournament_id', '=', 'tournaments.id')
-            ->where('date', $date)
-            ->where('player_id', $playerId)
-            ->where('pigeon_number', $pigeonNumber)
-            ->get();
+    $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
+        ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
+        ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
+        ->where('player_tournament.player_id', $playerId)
+        ->where('tournament_flying_days.date', $date)
+        ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
+        ->get();
 
-        foreach ($tournaments as $tournament) {
-            $modifiedData = $parsedData;
-            $modifiedData[0] = $tournament->tournament_id;
-            $modifiedData[5] = $tournament->club_id;
-            $this->updatePigeonTime($requestData, $modifiedData);
-        }
+    foreach ($tournaments as $tournament) {
+        $modifiedData = $parsedData;
+        $modifiedData[0] = $tournament->tournament_id;
+        $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for pigeons
+        $this->updatePigeonTime($requestData, $modifiedData);
     }
+}
 
-    /**
-     * Update start times across all tournaments when auto-update is enabled
-     */
-    private function updateAllTournamentStartTimes(array $requestData, array $parsedData): void
-    {
-        [$tournamentId, $date, $playerId] = $parsedData;
+/**
+ * Update start times across all tournaments when auto-update is enabled
+ */
+private function updateAllTournamentStartTimes(array $requestData, array $parsedData): void
+{
+    [$tournamentId, $date, $playerId] = $parsedData;
 
-        $tournaments = Result::select(['tournament_id','club_id'])
-            ->join('tournaments','results.tournament_id','=','tournaments.id')
-            ->where('date', $date)
-            ->where('player_id', $playerId)
-            ->get();
+    $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
+        ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
+        ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
+        ->where('player_tournament.player_id', $playerId)
+        ->where('tournament_flying_days.date', $date)
+        ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
+        ->get();
 
-        foreach ($tournaments as $tournament) {
-            $modifiedData = $parsedData;
-            $modifiedData[0] = $tournament->tournament_id;
-            $modifiedData[5] = $tournament->club_id;
-            $this->updateStartTime($requestData, $modifiedData);
-        }
+    foreach ($tournaments as $tournament) {
+        $modifiedData = $parsedData;
+        $modifiedData[0] = $tournament->tournament_id;
+        $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for start times
+        $this->updateStartTime($requestData, $modifiedData);
     }
+}
+
 
     /**
      * Update pigeon time for a specific result
@@ -331,28 +335,51 @@ class ResultService
     }
 
     /**
-     * Process results when supporter logic applies
-     */
-    private function processSupporterResults(Tournament $tournament, int $landedCount, Collection $results, bool $persist = true): Collection
-    {
-        $sortedResults = $results->sortBy('pigeon_total');
-        $targetCount = $tournament->pigeons - $tournament->supporter;
-        $excessCount = $landedCount - $targetCount;
+ * Process results when supporter logic applies
+ */
+private function processSupporterResults(Tournament $tournament, int $landedCount, \Illuminate\Support\Collection $results, bool $persist = true): \Illuminate\Support\Collection
+{
+    // First, restore any previously dropped records to their true value
+    if ($persist) {
+        Result::whereIn('id', $results->pluck('id'))
+            ->whereColumn('pigeon_total', '!=', 'time_in_seconds')
+            ->update([
+                'pigeon_total' => \Illuminate\Support\Facades\DB::raw('time_in_seconds')
+            ]);
+        foreach ($results as $result) {
+            $result->pigeon_total = $result->time_in_seconds;
+        }
+    } else {
+        foreach ($results as $result) {
+            $result->pigeon_total = $result->time_in_seconds;
+        }
+    }
 
-        $resultsToZero = $sortedResults->take($excessCount);
+    $sortedResults = $results->sortBy('time_in_seconds')->values();
+    $targetCount = $tournament->pigeons - $tournament->supporter;
+    $excessCount = $landedCount - $targetCount;
 
-        if ($resultsToZero->isNotEmpty()) {
-            if ($persist) {
-                Result::whereIn('id', $resultsToZero->pluck('id'))->update(['pigeon_total' => 0]);
-            } else {
-                foreach ($resultsToZero as $result) {
-                    $result->pigeon_total = 0;
-                }
+    $resultsToZero = $sortedResults->take($excessCount);
+
+    if ($resultsToZero->isNotEmpty()) {
+        if ($persist) {
+            Result::whereIn('id', $resultsToZero->pluck('id'))->update(['pigeon_total' => 0]);
+        } else {
+            foreach ($resultsToZero as $result) {
+                $result->pigeon_total = 0;
             }
         }
-
-        return $sortedResults->skip($excessCount);
+        
+        // Also update memory ref
+        foreach ($results as $result) {
+            if ($resultsToZero->contains('id', $result->id)) {
+                $result->pigeon_total = 0;
+            }
+        }
     }
+
+    return $results;
+}
 
     /**
      * Update or insert player tournament total record
