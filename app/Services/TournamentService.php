@@ -49,13 +49,14 @@ class TournamentService
                 $this->updateTournamentPrizes($tournament, $request->prize ?? []);
                 $this->syncTournamentPlayers($tournament, $request->players ?? []);
 
-                // Refresh tournament to get updated relationships
-                $tournament->refresh();
+                // Crucial step: Re-load tournament to ensure fresh `players` and `flyingDays` are available
+                // for the updateTournamentPlayerData logic.
+                $freshTournament = Tournament::with(['players', 'flyingDays'])->find($tournament->id);
 
-                // Update tournament-related data
-                $this->updateTournamentPlayerData($tournament);
+                // Update tournament-related data using the fresh model instance
+                $this->updateTournamentPlayerData($freshTournament);
                 
-                return $tournament;
+                return $freshTournament;
             } catch (\Exception $e) {
                 Log::error('Tournament update failed: ' . $e->getMessage(), [
                     'tournament_id' => $tournament->id,
@@ -91,7 +92,7 @@ class TournamentService
         }
     }
 
-    private function loadTournamentWithRelations(int $tournamentId): Tournament
+    private function loadTournamentWithRelations(int $tournamentId)
     {
         return Tournament::with(['flyingDays', 'players', 'tournamentPrize'])
             ->findOrFail($tournamentId);
@@ -100,7 +101,12 @@ class TournamentService
     private function syncTournamentDates(Tournament $tournament, array $newDates): void
     {
         $currentDates = $tournament->flyingDays->pluck('date')->toArray();
-        $datesToRemove = array_diff($currentDates, $newDates);
+        // Convert $newDates (which come from the m/d/Y GUI format) to match the DB Y-m-d format
+        $normalizedNewDates = array_map(function ($date) {
+            return Carbon::parse($date)->format('Y-m-d');
+        }, $newDates);
+
+        $datesToRemove = array_diff($currentDates, $normalizedNewDates);
 
         if (!empty($datesToRemove)) {
             // Use bulk delete for better performance
@@ -123,7 +129,7 @@ class TournamentService
         $flyingDays = collect($dates)->map(function ($date) use ($tournament) {
             return [
                 'tournament_id' => $tournament->id,
-                'date' => $date,
+                'date' => Carbon::parse($date)->format('Y-m-d'), // Ensure date is formatted properly for insert
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
@@ -197,11 +203,8 @@ class TournamentService
             return;
         }
 
-        // Clean up existing records
-        Result::where('tournament_id', $tournament->id)
-            ->where('pigeon_total', 0)
-            ->whereNull('pigeon_time')
-            ->delete();
+        // Clean up existing records ONLY if we need to. Actually, we should specifically NOT delete anything here
+        // Instead, we will use insertOrIgnore so we only create MISSING rows, and NEVER touch existing rows!
 
         $resultData = [];
         $now = Carbon::now();
@@ -211,12 +214,18 @@ class TournamentService
             ->pluck( 'start_time','player_id')
             ->toArray();
 
+        // Safety: If pigeon count was reduced, delete the dangling extra pigeons first!
+        Result::where('tournament_id', $tournament->id)
+            ->where('pigeon_number', '>', $pigeonCount)
+            ->delete();
+
+        $resultData = [];
+
         foreach ($tournament->flyingDays as $day) {
             foreach ($tournament->players as $player) {
                 $startTime = ( isset($playerWithChangedStartTime[$player->id])  && $playerWithChangedStartTime[$player->id] != null)
                     ? $playerWithChangedStartTime[$player->id] 
                     : $tournament->start_time;
-                    
 
                 for ($i = 1; $i <= $pigeonCount; $i++) {
                     $resultData[] = [
@@ -231,9 +240,10 @@ class TournamentService
                 }
             }
         }
-        // Process in batches to avoid memory issues
+        
+        // Process in batches
         $uniqueColumns = ['player_id', 'tournament_id', 'date', 'pigeon_number'];
-        $updateColumns = ['pigeon_number', 'date', 'start_time'];
+        $updateColumns = ['updated_at']; // WE INTENTIONALLY DO NOT UPDATE start_time HERE TO PRESERVE CUSTOM EDITS
 
         foreach (array_chunk($resultData, self::BATCH_SIZE) as $batch) {
             DB::table('results')->upsert($batch, $uniqueColumns, $updateColumns);
@@ -377,8 +387,10 @@ class TournamentService
     public function syncTournamentModerator($request, $tournament)
     {
         if (is_array($request->tournament_admins)) {
+            // Delete all current moderators ONCE before the loop
+            DB::table('tournament_moderator')->where(['tournament_id' => $tournament->id])->delete();
+            
             foreach ($request->tournament_admins as $admin) {
-                DB::table('tournament_moderator')->where(['tournament_id' => $tournament->id])->delete();
                 DB::table('tournament_moderator')->insert([
                     'user_id' => $admin,
                     'tournament_id' => $tournament->id,
