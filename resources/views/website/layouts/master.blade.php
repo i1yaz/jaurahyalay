@@ -37,6 +37,7 @@
             font-family: 'Noto Nastaliq Urdu', serif;
         }
     </style>
+    <x-facebook-pixel />
 </head>
 
 <body class="hold-transition sidebar-mini">
