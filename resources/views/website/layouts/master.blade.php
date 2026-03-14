@@ -38,6 +38,7 @@
         }
     </style>
     <x-facebook-pixel />
+    <x-meta-capi-tracking />
 </head>
 
 <body class="hold-transition sidebar-mini">
