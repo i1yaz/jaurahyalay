@@ -100,7 +100,7 @@ class PlayerController extends Controller
 
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
-            $query->where('name', 'LIKE', "%{$search}%");
+            $query->where('players.name', 'LIKE', "%{$search}%");
 
             $totalFiltered = $query->count();
         }
