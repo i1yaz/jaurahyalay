@@ -58,6 +58,6 @@ return [
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#traces-sample-rate
-    'traces_sample_rate' => env('SENTRY_TRACES_SAMPLE_RATE',1.0),
+    'traces_sample_rate' => (float) env('SENTRY_TRACES_SAMPLE_RATE',1.0),
 
 ];
