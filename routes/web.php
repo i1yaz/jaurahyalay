@@ -60,8 +60,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['middleware' => 'club', 'as' => 'club_admin.'], function () {
         // All Super Admin Routes
         Route::resource('club/admin/user', ClubAdminUserController::class);
-        Route::resource('club/admin/player', ClubAdminPlayerController::class);
+        Route::post('club/admin/player/bulk-delete', [ClubAdminPlayerController::class, 'bulkDelete'])->name('player.bulk_delete');
         Route::get('club/admin/players/data', [ClubAdminPlayerController::class, 'getPlayers'])->name('players.data');
+        Route::get('club/admin/player/{player}/tournaments', [ClubAdminPlayerController::class, 'getPlayerTournaments'])->name('player.tournaments');
+        Route::resource('club/admin/player', ClubAdminPlayerController::class);
         Route::resource('club/admin/tournament', ClubAdminTournamentController::class);
     });
 
@@ -71,8 +73,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('admin/auto-update-time', [AdminWebsiteController::class, 'autoUpdateTime'])->name('website.auto_update_time');
         Route::post('admin/first-winner-last-winner', [AdminWebsiteController::class, 'firstWinnerLastWinnerConditions'])->name('website.first_winner_last_winner');
         Route::resource('admin/user', UserController::class);
+        Route::post('admin/player/bulk-delete', [PlayerController::class, 'bulkDelete'])->name('player.bulk_delete');
+        Route::get('admin/player/data', [PlayerController::class, 'getPlayers'])->name('players.data');
+        Route::get('admin/player/{player}/tournaments', [PlayerController::class, 'getPlayerTournaments'])->name('player.tournaments');
         Route::resource('admin/player', PlayerController::class);
-        Route::get('admin/players/data', [PlayerController::class, 'getPlayers'])->name('players.data');
         Route::resource('admin/tournament', TournamentController::class);
         Route::resource('admin/club', ClubController::class);
         Route::resource('admin/news', NewsController::class);
