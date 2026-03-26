@@ -5,21 +5,22 @@
             flex-direction: row !important;
         }
     }
+
     @media screen and (min-width: 480px) {
         body {
             -ms-flex-direction: column;
             flex-direction: column !important;
         }
     }
+
     .navbar-dark .navbar-nav .nav-link {
         color: white;
     }
 </style>
 
 <style>
-
     /* Optional: keeps background active on hover */
-    .navbar-nav .dropdown:hover > .nav-link {
+    .navbar-nav .dropdown:hover>.nav-link {
         background-color: rgba(255, 255, 255, 0.1);
     }
 
@@ -58,7 +59,7 @@
 
     /* Hover only for large screens */
     @media (min-width: 992px) {
-        .navbar-nav .dropdown:hover > .nav-link {
+        .navbar-nav .dropdown:hover>.nav-link {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
@@ -67,9 +68,6 @@
             margin-top: 0;
         }
     }
-
-
-    
 </style>
 
 
@@ -86,25 +84,26 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="clubsDropdown">
                 @foreach ($activeClubs as $club)
-                    <a class="dropdown-item @if($club->id == $segmentClub) active @endif" href="{{ route('result.club', ['club' => $club->id]) }}" style="margin-top: 20px;">
+                    <a class="dropdown-item @if($club->id == $segmentClub) active @endif"
+                        href="{{ route('result.club', ['club' => $club->id]) }}" style="margin-top: 20px;">
                         {{ $club->name }}
                     </a>
                 @endforeach
             </div>
         </li>
 
-        <li class="nav-item @if($route=='weather') active @endif" style="margin-left: 15%;">
+        <li class="nav-item @if($route == 'weather') active @endif" style="margin-left: 15%;">
             <a class="nav-link" href="{{ route('result.club', ['club' => 1]) }}">Tournaments</a>
         </li>
 
-        <li class="nav-item @if($route=='weather') active @endif" style="margin-left: 15%;">
+        <li class="nav-item @if($route == 'weather') active @endif" style="margin-left: 15%;">
             <a class="nav-link" href="{{ route('weather') }}">Weather</a>
         </li>
         <li class="nav-item" style="margin-left: 15%;">
-            <a class="nav-link @if($route=='contact') active @endif" href="{{ route('contact') }}">Contact</a>
+            <a class="nav-link @if($route == 'contact') active @endif" href="{{ route('contact') }}">Contact</a>
         </li>
     </ul>
 
-    <span class="navbar-text"><b id="online-users"></b></span>
+    <span class="navbar-text" style="color: aliceblue"><b id="online-users"></b></span>
     <span class="float-right mr-3 ml-4" style="color: aliceblue" id="localdate"></span>
 </nav>
