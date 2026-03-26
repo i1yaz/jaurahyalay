@@ -197,7 +197,7 @@
                 '<button type="button" class="btn btn-default btn-sm editable-cancel">' +
                 '<i class="fa fa-times" aria-hidden="true"></i>' +
                 '</button>' @if($tournament->allow_double_stamp) +
-                '<button type="button" class="btn btn-warning btn-sm editable-double-stamp" style="background-color: gold; color: black; border-color: gold;margin-left: 7px">' +
+                '<button type="button" class="btn btn-warning btn-sm btn-double-stamp" style="background-color: gold; color: black; border-color: gold;margin-left: 7px">' +
                 '<i class="fa fa-stamp" aria-hidden="true"></i>' +
                 '</button>' @endif;
 
@@ -249,12 +249,20 @@
                 }
             });
 
-            $(document).on('click', '.editable-double-stamp', function() {
-                var container = $(this).closest('.editable-container');
-                var editable = container.prev().data('editable');
-                var pk = editable.options.pk;
+            $(document).on('click', '.btn-double-stamp', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var btn = $(this);
-                var td = container.prev().closest('td');
+                var container = btn.closest('.editable-container');
+                var editableContainer = container.data('editableContainer');
+                if (!editableContainer) {
+                    console.error('X-editable container not found');
+                    return;
+                }
+                var $el = editableContainer.$element;
+                var pk = $el.data('pk');
+                var td = $el.closest('td');
+
                 $.ajax({
                     url: '{{ route('result.double_stamp') }}',
                     type: 'POST',
@@ -267,6 +275,9 @@
                             btn.removeClass('btn-warning').addClass('btn-default');
                             td.css('background-color', 'transparent');
                         }
+                    },
+                    error: function() {
+                        alert('Error updating double stamp status');
                     }
                 });
             });
