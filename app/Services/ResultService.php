@@ -482,7 +482,8 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
                     'r1.start_time',
                     'r1.pigeon_time',
                     'r1.pigeon_total',
-                    'r1.time_in_seconds'
+                    'r1.time_in_seconds',
+                    'r1.is_double_stamp'
                 ])
                 ->get()
                 ->groupBy('player_id');
