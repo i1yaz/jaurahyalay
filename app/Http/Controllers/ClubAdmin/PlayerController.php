@@ -26,11 +26,7 @@ class PlayerController extends Controller
 
     public function index()
     {
-        $page = request()->query('page');
-        $page = ($page === null) ? 1 : $page;
-        $records = 20;
-        $players = Player::where('club_id',Auth::user()->club_id)->paginate($records);
-        return view('admin.club_admin.player.index', compact('players', 'page', 'records'));
+        return view('admin.club_admin.player.index');
     }
 
     public function create()
@@ -97,6 +93,14 @@ class PlayerController extends Controller
         $dir = $request->input('order.0.dir');
 
         $query = Player::query()->where('club_id', $clubId);
+
+        if ($request->has('status') && $request->status !== 'all') {
+            if ($request->status === 'played') {
+                $query->has('tournaments');
+            } elseif ($request->status === 'not_played') {
+                $query->doesntHave('tournaments');
+            }
+        }
 
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');

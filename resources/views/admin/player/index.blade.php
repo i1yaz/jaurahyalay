@@ -38,9 +38,23 @@
         <h5 class="card-title"></h5>
 
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
+          <div class="row mr-2" style="width: auto;">
+            <div class="col-md-6 p-0 mr-2">
+                <select id="filter-club" class="form-control form-control-sm">
+                    <option value="all">All Clubs</option>
+                    @foreach($clubs as $club)
+                        <option value="{{ $club->id }}">{{ $club->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-5 p-0">
+                <select id="filter-status" class="form-control form-control-sm">
+                    <option value="all">All Players</option>
+                    <option value="played">Has Tournament</option>
+                    <option value="not_played">No Tournament</option>
+                </select>
+            </div>
+          </div>
         </div>
       </div>
       <!-- /.card-header -->
@@ -115,7 +129,13 @@
         var table = $('#players').DataTable({
           processing: true,
           serverSide: true,
-          ajax: '{{ route("players.data") }}',
+          ajax: {
+            url: '{{ route("players.data") }}',
+            data: function (d) {
+                d.club_id = $('#filter-club').val();
+                d.status = $('#filter-status').val();
+            }
+          },
           pageLength: 25,
           order: [[1, 'asc']], // Order by Name by default (index 1 since checkbox is 0)
           columns: [
@@ -129,6 +149,10 @@
             { data: 'edit', name: 'edit', orderable: false, searchable: false },
             { data: 'delete', name: 'delete', orderable: false, searchable: false }
           ]
+        });
+
+        $('#filter-club, #filter-status').on('change', function() {
+            table.draw();
         });
 
         // Handle Select All

@@ -25,11 +25,8 @@ class PlayerController extends Controller
 
     public function index()
     {
-        $page = request()->query('page');
-        $page = ($page === null) ? 1 : $page;
-        $records = 20;
-        $players = Player::paginate($records);
-        return view('admin.player.index', compact('players', 'page', 'records'));
+        $clubs = Club::where('status', true)->orderBy('name', 'asc')->get();
+        return view('admin.player.index', compact('clubs'));
     }
 
     public function create()
@@ -100,10 +97,24 @@ class PlayerController extends Controller
 
         $query = Player::query();
 
+        if ($request->has('club_id') && $request->club_id !== 'all') {
+            $query->where('players.club_id', $request->club_id);
+        }
+
+        if ($request->has('status') && $request->status !== 'all') {
+            if ($request->status === 'played') {
+                $query->has('tournaments');
+            } elseif ($request->status === 'not_played') {
+                $query->doesntHave('tournaments');
+            }
+        }
+
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
             $query->where('players.name', 'LIKE', "%{$search}%");
 
+            $totalFiltered = $query->count();
+        } else {
             $totalFiltered = $query->count();
         }
 
@@ -126,7 +137,7 @@ class PlayerController extends Controller
             }
             $nestedData['checkbox'] = '<input type="checkbox" class="player-checkbox" value="'.$player->id.'">';
             $nestedData['name'] = '<img src="'.asset('website/profiles/' . ($player->poster ?? $image)).'" width="40" class="profileimg '.$circleClass.' lozad"> <b>' . $player->name . '</b>';
-            $nestedData['club'] = $player->club_name??'All Clubs';
+            $nestedData['club'] = $player->club_name ?? 'All Clubs';
             $nestedData['phone'] = $player->phone;
             $nestedData['city'] = $player->city;
             $nestedData['province'] = $player->province;

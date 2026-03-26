@@ -38,6 +38,15 @@
         <h5 class="card-title"></h5>
 
         <div class="card-tools">
+          <div class="row mr-2" style="width: auto;">
+            <div class="col-md-12 p-0">
+                <select id="filter-status" class="form-control form-control-sm">
+                    <option value="all">All Participation</option>
+                    <option value="played">Has Tournament</option>
+                    <option value="not_played">No Tournament</option>
+                </select>
+            </div>
+          </div>
           <button type="button" class="btn btn-tool" data-card-widget="collapse">
             <i class="fas fa-minus"></i>
           </button>
@@ -115,7 +124,12 @@
         var table = $('#players').DataTable({
           processing: true,
           serverSide: true,
-          ajax: '{{ route("club_admin.players.data") }}',
+          ajax: {
+            url: '{{ route("club_admin.players.data") }}',
+            data: function (d) {
+                d.status = $('#filter-status').val();
+            }
+          },
           pageLength: 25,
           order: [[1, 'asc']], // Order by Name by default
           columns: [
@@ -129,6 +143,10 @@
             { data: 'edit', name: 'edit', orderable: false, searchable: false },
             { data: 'delete', name: 'delete', orderable: false, searchable: false }
           ]
+        });
+
+        $('#filter-status').on('change', function() {
+            table.draw();
         });
 
         // Handle Select All
