@@ -39,7 +39,7 @@
 
         <div class="card-tools">
           <div class="row mr-2" style="width: auto;">
-            <div class="col-md-12 p-0">
+            <div class="col-md-12 p-0 mb-2 mb-md-0">
                 <select id="filter-status" class="form-control form-control-sm">
                     <option value="all">All Participation</option>
                     <option value="played">Has Tournament</option>
