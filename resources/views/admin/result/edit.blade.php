@@ -193,6 +193,17 @@
             }
         });
         $(document).ready(function(e) {
+            $.fn.editableform.buttons =
+                '<button type="submit" class="btn btn-primary btn-sm editable-submit">' +
+                '<i class="fa fa-check" aria-hidden="true"></i>' +
+                '</button>' +
+                '<button type="button" class="btn btn-default btn-sm editable-cancel">' +
+                '<i class="fa fa-times" aria-hidden="true"></i>' +
+                '</button>' @if($tournament->allow_double_stamp) +
+                '<button type="button" class="btn btn-warning btn-sm editable-double-stamp" style="background-color: gold; color: black; border-color: gold;margin-left: 7px">' +
+                '<i class="fa fa-stamp" aria-hidden="true"></i>' +
+                '</button>' @endif;
+
             /*
              * Update Pigeon Time
              */
@@ -239,6 +250,30 @@
                 display: function(value, response) {
                     $(this).html(response);
                 }
+            });
+
+            $(document).on('click', '.editable-double-stamp', function() {
+                var container = $(this).closest('.editable-container');
+                var editable = container.prev().data('editable');
+                var pk = editable.options.pk;
+                var btn = $(this);
+                var mainBtn = container.prev().closest('td').find('.double-stamp');
+                $.ajax({
+                    url: '{{ route('result.double_stamp') }}',
+                    type: 'POST',
+                    data: {pk: pk},
+                    success: function (response) {
+                        if (response == 1 || response == true) {
+                            btn.removeClass('btn-default').addClass('btn-warning');
+                            mainBtn.removeClass('btn-default').addClass('btn-warning');
+                            mainBtn.closest('td').css('background-color', '#ffc107');
+                        } else {
+                            btn.removeClass('btn-warning').addClass('btn-default');
+                            mainBtn.removeClass('btn-warning').addClass('btn-default');
+                            mainBtn.closest('td').css('background-color', 'transparent');
+                        }
+                    }
+                });
             });
 
             $('.double-stamp').click(function () {
