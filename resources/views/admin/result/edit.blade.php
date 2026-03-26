@@ -253,13 +253,11 @@
                 e.preventDefault();
                 e.stopPropagation();
                 var btn = $(this);
-                var container = btn.closest('.editable-container');
-                var editableContainer = container.data('editableContainer');
-                if (!editableContainer) {
-                    console.error('X-editable container not found');
+                var $el = $('.editable-open');
+                if (!$el.length) {
+                    console.error('Active editable element not found (.editable-open)');
                     return;
                 }
-                var $el = editableContainer.$element;
                 var pk = $el.data('pk');
                 var td = $el.closest('td');
 
