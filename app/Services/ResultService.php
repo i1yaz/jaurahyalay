@@ -626,7 +626,13 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
             $result->is_double_stamp = !$result->is_double_stamp;
             $result->save();
 
+            $clubId = end($parsedData);
+            $this->deferCacheFlush($tournamentId, $date, $clubId);
+
             $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
+
+            $this->executePendingCacheFlushes();
+
             return $result->is_double_stamp;
         }
 
