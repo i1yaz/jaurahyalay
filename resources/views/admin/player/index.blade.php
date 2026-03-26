@@ -39,7 +39,7 @@
 
         <div class="card-tools">
           <div class="row mr-2" style="width: auto;">
-            <div class="col-md-6 p-0 mr-2 mb-2 mb-md-0">
+            <div class="col-md-5 p-0 mr-2 mb-2 mb-md-0">
                 <select id="filter-club" class="form-control form-control-sm">
                     <option value="all">All Clubs</option>
                     @foreach($clubs as $club)
