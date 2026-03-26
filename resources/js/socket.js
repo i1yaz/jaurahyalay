@@ -36,7 +36,7 @@ function updateOnlineUsers(liveActive, rollingActive) {
   const element = document.getElementById("online-users")
   if (!element) return
   // element.innerText = `Live (${liveActive}) Active (${rollingActive})`
-  element.innerText = `Online  Users ${liveActive}`
+  element.innerText = `Online Users ${rollingActive}`
 }
 
 function getWebSocketUrl() {
