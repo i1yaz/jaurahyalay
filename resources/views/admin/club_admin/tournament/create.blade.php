@@ -90,6 +90,16 @@
                   <label class="form-check-label"  for="public_hide">Hide From Public</label>
                 </div>
 
+                <div class="form-check">
+                  <input type="checkbox" name="allow_double_stamp" class="form-check-input" id="allow_double_stamp">
+                  <label class="form-check-label" for="allow_double_stamp">Allow Double Stamp?</label>
+                </div>
+
+                <div class="form-check">
+                  <input type="checkbox" name="allow_auto_update" class="form-check-input" id="allow_auto_update" checked>
+                  <label class="form-check-label" for="allow_auto_update">Allow Auto Update?</label>
+                </div>
+
                 <div class="form-group days">
                     <label for="days">Days</label>
                     <input type="text" class="form-control " id="days" name="days" placeholder="days" value="{{ old('days')??1 }}" required>

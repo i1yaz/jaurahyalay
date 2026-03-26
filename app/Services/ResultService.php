@@ -108,6 +108,7 @@ private function updatePlayerTournamentPigeonTimes(array $requestData, array $pa
         ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
         ->where('player_tournament.player_id', $playerId)
         ->where('tournament_flying_days.date', $date)
+        ->where('tournaments.allow_auto_update', 1)
         ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
         ->get();
 
@@ -131,6 +132,7 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
         ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
         ->where('player_tournament.player_id', $playerId)
         ->where('tournament_flying_days.date', $date)
+        ->where('tournaments.allow_auto_update', 1)
         ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
         ->get();
 

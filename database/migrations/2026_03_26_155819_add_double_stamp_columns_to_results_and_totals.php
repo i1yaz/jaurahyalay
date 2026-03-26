@@ -19,7 +19,7 @@ return new class extends Migration
 
         Schema::table('player_tournament_total', function (Blueprint $table) {
             $table->integer('double_stamp_landed')->default(0)->after('total');
-            $table->decimal('double_stamp_total', 10, 2)->default(0)->after('double_stamp_landed');
+            $table->integer('double_stamp_total')->default(0)->after('double_stamp_landed');
         });
     }
 

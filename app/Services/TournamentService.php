@@ -83,6 +83,7 @@ class TournamentService
             'type' => $request->type,
             'public_hide' => $request->public_hide === 'on',
             'allow_double_stamp' => $request->allow_double_stamp === 'on',
+            'allow_auto_update' => $request->allow_auto_update === 'on',
         ];
     }
 

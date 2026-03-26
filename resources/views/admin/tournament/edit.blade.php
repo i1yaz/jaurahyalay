@@ -104,6 +104,11 @@
                     <label class="form-check-label"  for="allow_double_stamp">Allow Double Stamp?</label>
                   </div>
 
+                  <div class="form-check">
+                    <input type="checkbox" name="allow_auto_update" class="form-check-input" id="allow_auto_update" @if($tournament->allow_auto_update==1) checked @endif>
+                    <label class="form-check-label" for="allow_auto_update">Allow Auto Update?</label>
+                  </div>
+
                       <div class="form-group days">
                         <label for="days">Days</label>
                         <input type="text" class="form-control " id="days" name="days" placeholder="days" value="@if (old('days')){{ old('days') }}@else{{ $tournament->days }}@endif" required>
