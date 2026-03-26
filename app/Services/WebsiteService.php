@@ -123,7 +123,7 @@ class WebsiteService
             $sortedPlayerByPosition = $sortedPlayers->slice(0, count($prizes));
             foreach ($sortedPlayerByPosition as $key => $sortedPlayer) {
                 $player = $players->where('id', $sortedPlayer->player_id)->first();
-                $data[$tournament->id][$player->id] = [$player->name, $player->city, $sortedPlayer->total, $prizes[$key]['name']];
+                $data[$tournament->id][$player->id] = [$player->name, $player->city, $sortedPlayer->total, $prizes[$key]['name'], $player->poster];
             }
         }
 
