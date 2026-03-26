@@ -82,6 +82,7 @@ class TournamentService
             'supporter' => $request->supporter,
             'type' => $request->type,
             'public_hide' => $request->public_hide === 'on',
+            'allow_double_stamp' => $request->allow_double_stamp === 'on',
         ];
     }
 
@@ -342,6 +343,7 @@ class TournamentService
             'type' => $request->type,
             'sort' => $request->sort ?? 0,
             'public_hide' => $request->public_hide === 'on',
+            'allow_double_stamp' => $request->allow_double_stamp === 'on',
         ];
     }
 

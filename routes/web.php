@@ -51,6 +51,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Super Admin and Admin Routes
     Route::get('/admin', [HomeController::class, 'index'])->name('admin');
     Route::POST('admin/result/time', [ResultController::class, 'time'])->name('result.time');
+    Route::POST('admin/result/double-stamp', [ResultController::class, 'doubleStamp'])->name('result.double_stamp');
     Route::get('admin/result/refresh', [ResultController::class, 'refresh'])->name('admin.refresh');
     Route::patch('admin/result/update', [ResultController::class, 'updateResult'])->name('admin.result.update');
     Route::resource('admin/result', ResultController::class);

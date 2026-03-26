@@ -96,6 +96,23 @@ class WebsiteService
         return DB::table('player_tournament_total')->where('tournament_id', $tournament->id)->get()->groupBy('player_id');
     }
 
+    public function getTournamentDoubleStampTotal($tournament)
+    {
+        return DB::table('player_tournament_total')
+            ->selectRaw('player_id as player_id, SUM(double_stamp_total) as total, tournament_id as tournament')
+            ->where('tournament_id', $tournament->id)
+            ->groupBy('player_id')
+            ->orderBy('total', 'desc')
+            ->get();
+    }
+
+    public function getTournamentDoubleStampTotalByDays($tournament)
+    {
+        return DB::table('player_tournament_total')
+            ->where('tournament_id', $tournament->id)
+            ->get()->groupBy('player_id');
+    }
+
     public function getAllClubTournamentsWithPrizes($tournaments)
     {
         $data = [];
@@ -137,6 +154,10 @@ class WebsiteService
             $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
             $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
 
+            // Double stamp total pages
+            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+
             $paths = array_map(function ($url) {
                 $path = str_replace(url('/'), '', $url);
 
@@ -153,8 +174,9 @@ class WebsiteService
                     'club-'.$club_id,
                     'club-default',
                     'tournament-'.$tournament_id,
-                    'tournament-'.$tournament_id.'-date-'.$date,
-                    'tournament-'.$tournament_id.'-date-total',
+                    'tournament_'.$tournament_id.'-date-'.$date,
+                    'tournament_'.$tournament_id.'-date-total',
+                    'tournament_'.$tournament_id.'-date-double-stamp-total',
                 ];
 
                 if($firstActiveTournament->id == $tournament_id){
@@ -222,11 +244,16 @@ class WebsiteService
             $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
             $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
 
+            // Double stamp total pages
+            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+
             $allTags[] = 'club-'.$club_id;
             $allTags[] = 'club-default';
             $allTags[] = 'tournament-'.$tournament_id;
             $allTags[] = 'tournament-'.$tournament_id.'-date-'.$date;
             $allTags[] = 'tournament-'.$tournament_id.'-date-total';
+            $allTags[] = 'tournament-'.$tournament_id.'-date-double-stamp-total';
 
             if ($firstActiveTournament && $firstActiveTournament->id == $tournament_id) {
                 // Home page

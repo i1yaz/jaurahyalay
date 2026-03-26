@@ -15,8 +15,12 @@
                     @endforeach
                     <a style="margin-top: 15px" class="btn btn-submenu @if('total' == $resultDate) active  @endif"
                        href="{{route('result.tournament.date',['club'=> $tournament->club_id,'tournament'=>$tournament->id,'date'=>'total'])}}">Total</a>
+                    @if($tournament->allow_double_stamp)
+                    <a style="margin-top: 15px"
+                       class="btn btn-submenu {{$resultDate == 'double-stamp-total' ? 'active' : ''}}" href="{{route('result.tournament.date', [$tournament->club_id, $tournament->id, 'double-stamp-total'])}}">Double Stamp Total</a>
+                    @endif
                 </div>
-                @if ($resultDate !='total')
+                @if ($resultDate !='total' && $resultDate !='double-stamp-total')
 
                     <div class="bs-callout bs-callout-info">
                         <p>
@@ -43,10 +47,12 @@
                 @endif
             </div>
             {{-- Tournament Table --}}
-            @if ($resultDate !=='total')
-                @include('website.result.date_result')
-            @else
+            @if ($resultDate === 'total')
                 @include('website.result.total_result')
+            @elseif($resultDate === 'double-stamp-total')
+                @include('website.result.double_stamp_total')
+            @else
+                @include('website.result.date_result')
             @endif
         </div>
     </div>

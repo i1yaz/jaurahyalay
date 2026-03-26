@@ -11,7 +11,8 @@ class Tournament extends BaseModel
     use HasFactory;
     protected $fillable = [
         'name', 'days', 'status', 'show', 'pigeons',
-        'start_date', 'start_time', 'supporter', 'club_id', 'poster', 'sort','type','public_hide',
+        'start_date', 'start_time', 'supporter', 'club_id', 'poster', 'sort', 'type', 'public_hide',
+        'allow_double_stamp'
     ];
 
 

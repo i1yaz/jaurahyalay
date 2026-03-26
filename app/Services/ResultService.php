@@ -298,7 +298,12 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
 
         $processedResults = $this->applySupporterLogic($tournament, $landedCount, $validResults);
 
-        $this->updatePlayerTournamentTotalRecord($tournamentId, $date, $playerId, $landedCount, $processedResults);
+        // Double stamp logic
+        $doubleStampResults = $validResults->filter(fn($r) => $r->is_double_stamp == 1 || $r->is_double_stamp === true);
+        $doubleStampLanded = $doubleStampResults->count();
+        $doubleStampTotal = $doubleStampResults->sum('pigeon_total');
+
+        $this->updatePlayerTournamentTotalRecord($tournamentId, $date, $playerId, $landedCount, $processedResults, $doubleStampLanded, $doubleStampTotal);
     }
 
     /**
@@ -384,7 +389,7 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
     /**
      * Update or insert player tournament total record
      */
-    private function updatePlayerTournamentTotalRecord(string $tournamentId, string $date, string $playerId, int $landedCount, Collection $results): void
+    private function updatePlayerTournamentTotalRecord(string $tournamentId, string $date, string $playerId, int $landedCount, Collection $results, int $doubleStampLanded = 0, float $doubleStampTotal = 0): void
     {
         DB::table('player_tournament_total')
             ->updateOrInsert(
@@ -395,7 +400,9 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
                 ],
                 [
                     'landed' => $landedCount,
-                    'total' => $results->sum('pigeon_total')
+                    'total' => $results->sum('pigeon_total'),
+                    'double_stamp_landed' => $doubleStampLanded,
+                    'double_stamp_total' => $doubleStampTotal
                 ]
             );
     }
@@ -515,12 +522,19 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
 
                 $processedResults = $this->applySupporterLogic($tournament, $landedCount, $validResults, false);
 
+                // Double stamp logic
+                $doubleStampResults = $validResults->filter(fn($r) => $r->is_double_stamp == 1 || $r->is_double_stamp === true);
+                $doubleStampLanded = $doubleStampResults->count();
+                $doubleStampTotal = $doubleStampResults->sum('pigeon_total');
+
                 $totalUpsertData[] = [
                     'tournament_id' => $tournamentId,
                     'date' => $date,
                     'player_id' => $playerId,
                     'landed' => $landedCount,
-                    'total' => $processedResults->sum('pigeon_total')
+                    'total' => $processedResults->sum('pigeon_total'),
+                    'double_stamp_landed' => $doubleStampLanded,
+                    'double_stamp_total' => $doubleStampTotal
                 ];
                 
                 // Sync zeroed pigeon_totals back to upsertData
@@ -563,7 +577,7 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
                     DB::table('player_tournament_total')->upsert(
                         $chunk,
                         ['player_id', 'tournament_id', 'date'],
-                        ['landed', 'total']
+                        ['landed', 'total', 'double_stamp_landed', 'double_stamp_total']
                     );
                 }
             }
@@ -592,6 +606,31 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
                 'club_id' => $clubId
             ];
         }
+    }
+
+    /**
+     * Toggle double stamp status for a pigeon
+     */
+    public function toggleDoubleStamp(string $primaryKey): bool
+    {
+        $parsedData = explode('_', $primaryKey);
+        if (count($parsedData) < 4) {
+            return false;
+        }
+
+        [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
+
+        $result = $this->findResult($tournamentId, $date, $playerId, $pigeonNumber);
+
+        if ($result) {
+            $result->is_double_stamp = !$result->is_double_stamp;
+            $result->save();
+
+            $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
+            return $result->is_double_stamp;
+        }
+
+        return false;
     }
 
     /**

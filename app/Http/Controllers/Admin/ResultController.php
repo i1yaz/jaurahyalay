@@ -83,6 +83,17 @@ class ResultController extends Controller
         return response()->json('Sorry You don\'t have permission!');
     }
 
+    public function doubleStamp(Request $request)
+    {
+        $response = (new ResultService)->canEditThisResult($request);
+        if ($response) {
+            $status = (new ResultService)->toggleDoubleStamp($request->pk);
+            return response()->json($status);
+        }
+
+        return response()->json('Sorry You don\'t have permission!');
+    }
+
     public function updateResult(Request $request)
     {
 

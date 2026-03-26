@@ -12,7 +12,7 @@ class Result extends BaseModel
     protected $fillable = [
         'pigeon_number', 'pigeon_time', 'total_time',
         'player_id', 'tournament_id', 'pigeon_total', 'time_in_seconds',
-        'date', 'start_time'
+        'date', 'start_time', 'is_double_stamp'
     ];
     public function resultOfPlayer()
     {

@@ -99,6 +99,11 @@
                     <label class="form-check-label"  for="public_hide">Hide From Public</label>
                   </div>
 
+                  <div class="form-check">
+                    <input type="checkbox"name="allow_double_stamp" class="form-check-input" id="allow_double_stamp" @if($tournament->allow_double_stamp==1) checked @endif>
+                    <label class="form-check-label"  for="allow_double_stamp">Allow Double Stamp?</label>
+                  </div>
+
                       <div class="form-group days">
                         <label for="days">Days</label>
                         <input type="text" class="form-control " id="days" name="days" placeholder="days" value="@if (old('days')){{ old('days') }}@else{{ $tournament->days }}@endif" required>

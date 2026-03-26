@@ -143,7 +143,10 @@
                                                 ->where('pigeon_number', $i + 1)
                                                 ->first();
                                         @endphp
-                                        <td>
+                                        <td @if($tournament->allow_double_stamp && isset($player_result->is_double_stamp) && $player_result->is_double_stamp) style="background-color: #ffc107;" @endif>
+                                            @if($tournament->allow_double_stamp)
+                                            <button class="btn btn-xs double-stamp @if(isset($player_result->is_double_stamp) && $player_result->is_double_stamp) btn-warning @else btn-default @endif" data-pk="{{ $tournament->id }}_{{ $updateDate }}_{{ $player->id }}_{{ $i + 1 }}_{{ $tournament->club_id }}"><i class="fa fa-stamp"></i></button>
+                                            @endif
                                             <span class="pigeon editable-click"
                                                 data-pk="{{ $tournament->id }}_{{ $updateDate }}_{{ $player->id }}_{{ $i + 1 }}_{{ $tournament->club_id }}"
                                                 data-emptytext="Empty" data-title="Enter time HH:ii:ss">
@@ -236,6 +239,25 @@
                 display: function(value, response) {
                     $(this).html(response);
                 }
+            });
+
+            $('.double-stamp').click(function () {
+                var btn = $(this);
+                var pk = btn.data('pk');
+                $.ajax({
+                    url: '{{ route('result.double_stamp') }}',
+                    type: 'POST',
+                    data: {pk: pk},
+                    success: function (response) {
+                        if (response == 1 || response == true) {
+                            btn.removeClass('btn-default').addClass('btn-warning');
+                            btn.closest('td').css('background-color', '#ffc107');
+                        } else {
+                            btn.removeClass('btn-warning').addClass('btn-default');
+                            btn.closest('td').css('background-color', 'transparent');
+                        }
+                    }
+                });
             });
         });
     </script>
