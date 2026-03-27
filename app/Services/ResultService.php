@@ -102,6 +102,12 @@ class ResultService
 private function updatePlayerTournamentPigeonTimes(array $requestData, array $parsedData): void
 {
     [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
+    $currentTournament = Tournament::find($tournamentId);
+    
+    if (!$currentTournament || !$currentTournament->allow_auto_update) {
+         $this->updatePigeonTime($requestData, $parsedData);
+         return;
+    }
 
     $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
         ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
@@ -126,6 +132,12 @@ private function updatePlayerTournamentPigeonTimes(array $requestData, array $pa
 private function updateAllTournamentStartTimes(array $requestData, array $parsedData): void
 {
     [$tournamentId, $date, $playerId] = $parsedData;
+    $currentTournament = Tournament::find($tournamentId);
+
+    if (!$currentTournament || !$currentTournament->allow_auto_update) {
+        $this->updateStartTime($requestData, $parsedData);
+        return;
+    }
 
     $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
         ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
