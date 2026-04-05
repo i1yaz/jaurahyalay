@@ -1,12 +1,50 @@
+:root {
+    /* Primary Brand Colors */
+    --primary-blue: rgb(17, 138, 178);
+    --primary-blue-alt: rgba(7, 59, 76);
+    --primary-blue-solid: #007bff;
+    --news-bar: #EF476F;
+    --bg-pink-tint: #d1fff3;  /* Table odd color */
+    --bg-hover-green: #FFD166; /* Table Hover */
+    /* First/Last Pigeon Winner Colors */
+    --first-last-pigeons-bg: #EF476F;
+    --first-last-pigeons-text: #ffffff;
+
+    /* Accent Colors */
+    
+    --accent-red: #ff0000;
+    --accent-teal: #20a286;
+    --accent-teal-light: #19b99a;
+    --accent-cyan: #5bc0de;
+    --accent-pink: #f25ebc;
+
+    /* Background Colors */
+    --bg-body: #ececec;
+    --bg-light-gray: #ecf0f5;
+    --bg-navy: #003F72;
+    --bg-card-blue: #0275d8;
+
+    /* Text Colors */
+    --text-white: #ffffff;
+    --text-dark: #555555;
+    --text-link-blue: #008cba;
+
+    /* Border Colors */
+    --border-light: #eeeeee;
+    --border-medium: #dddddd;
+
+
+}
+
 body {
-    background-color: #ececec;
+    background-color: var(--bg-body);
     min-width: 1050px;
 }
 .alert-pak {
-    background-color: #20a286;
-    color: #fff;
+    background-color: var(--accent-teal);
+    color: var(--text-white);
     font-size: 15px;
-    border: 1px solid #19b99a;
+    border: 1px solid var(--accent-teal-light);
 }
 
 .submenu {
@@ -21,7 +59,7 @@ body {
     margin: 10px 0 0 0;
     padding: 0;
     min-width: 1050px;
-    border: 3px solid #eee;
+    border: 3px solid var(--border-light);
 }
 #logo img {
     width: 100%;
@@ -39,28 +77,28 @@ img {
     margin-top: 10px;
 }
 .card-header {
-    background-color: #0275d8;
+    background-color: var(--bg-card-blue);
 }
 h1 {
     margin: 10px 0;
     padding: 0 5px;
     font-weight: 700;
     font-size: 2em;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-medium);
 }
 h1 small {
     font-weight: 700;
-    color: #555;
+    color: var(--text-dark);
 }
 .event {
     display: block;
     min-height: 260px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-light);
     padding: 5px 0;
     clear: both;
 }
 .event a {
-    color: #008cba;
+    color: var(--text-link-blue);
 }
 .event img.poster {
     float: left;
@@ -98,7 +136,7 @@ table.tournaments ul.list-group li {
     padding: 5px;
 }
 table.tournaments ul.list-group li:nth-of-type(odd) {
-    background-color: #ecf0f5;
+    background-color: var(--bg-light-gray);
 }
 table.tournaments img {
     width: 200px;
@@ -133,7 +171,7 @@ span.location {
     display: block;
 }
 .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #ecf0f5;
+    background-color: var(--bg-light-gray);
 }
 .table-hover > tbody > tr:hover {
 
@@ -144,7 +182,7 @@ span.location {
 .bs-callout {
     padding: 20px;
     margin: 20px 0;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-light);
     border-left-width: 5px;
     border-radius: 3px;
 }
@@ -159,13 +197,13 @@ span.location {
     margin-top: -5px;
 }
 .bs-callout-info {
-    border-left-color: #5bc0de;
+    border-left-color: var(--accent-cyan);
 }
 .bs-callout-info h4 {
-    color: #5bc0de;
+    color: var(--accent-cyan);
 }
 .anhor {
-    color: #fff;
+    color: var(--text-white);
 }
 .anhor:hover {
     color: #f0fff0;
@@ -175,15 +213,15 @@ span.location {
 }
 @keyframes blinker {
     50% {
-        background-color: #f25ebc;
+        background-color: var(--accent-pink);
     }
 }
 .card-nav {
-    background-color: #003F72;
+    background-color: var(--bg-navy);
 }
 .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-    background-color: red;
+    background-color: var(--accent-red);
 }
 
 .rounded-circle {
@@ -196,26 +234,26 @@ span.location {
     float: left;
 }
 .table tbody tr:hover td, .table tbody tr:hover th {
-    background-color: #dfffb3 !important;
+    background-color: var(--bg-hover-green) !important;
 }
 h3{
     font-size: 1.25rem;
 }
 
 .bg-navbar {
-    background: linear-gradient(to right, rgba(63,0,255), rgb(75, 18, 243));
-    color: white; /* For better text contrast */
+    background: linear-gradient(to right, var(--primary-blue), var(--primary-blue-alt));
+    color: var(--text-white); /* For better text contrast */
     border: none; /* Optional: Removes default border */
 }
 .card-header{
-    background: linear-gradient(to right, rgba(63,0,255), rgb(75, 18, 243))!important;
-    color: white; /* or dark text if using Option C */
+    background: linear-gradient(to right, var(--primary-blue), var(--primary-blue-alt))!important;
+    color: var(--text-white); /* or dark text if using Option C */
     border: none;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table-striped>tbody>tr:nth-of-type(odd) {
-    background-color: #fde8f5;
+    background-color: var(--bg-pink-tint);
 }
 
 .table-striped>tbody>tr {
@@ -226,52 +264,57 @@ h3{
 
 
 .thead-custom {
-    background-color: white;
-    color: #007bff;
+    background-color: var(--text-white);
+    color: var(--primary-blue-solid);
     font-weight: bold;
 }
 
 /* navbar text color, Home , Clubs, New etc */
 /* Navbar link color */
 .navbar.bg-navbar .nav-link {
-    color: white!important; 
+    color: var(--text-white) !important; 
 }
 
 /* On hover/focus */
 .navbar.bg-navbar .nav-link:hover,
 .navbar.bg-navbar .nav-link:focus {
-    color: white!important;
+    color: var(--text-white) !important;
 }
 
 /* Active link */
 .navbar.bg-navbar .nav-item.active .nav-link,
 .navbar.bg-navbar .nav-link.active {
-    color: white!important;
+    color: var(--text-white) !important;
 }
 /* change color of car */
 .card-header.shadow-lg {
-    color: white!important; /* black */
+    color: var(--text-white) !important; /* black */
 }
 .text-color {
-    color: white!important; /* black */
+    color: var(--text-white) !important; /* black */
 }
 
 
 .submenu .btn-submenu {
-    color: rgba(63,0,255);
-    border-color: rgba(63,0,255);
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
 }
 
 .submenu .btn-submenu.active,.submenu .btn-submenu:hover {
-    color: #fff;
-    background-color: rgba(63,0,255);
-    border-color: rgba(63,0,255);
+    color: var(--text-white);
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
 }
 
 .alert-danger-custom {
-    background-color: #ff0000;
+    background-color: var(--news-bar);
     padding: 10px;
     border-radius: 5px;
-    color: white;
+    color: var(--text-white);
     margin-top: 10px;
+}
+
+.pigeon-winner-alert {
+    background-color: var(--first-last-pigeons-bg);
+    color: var(--first-last-pigeons-text);
 }

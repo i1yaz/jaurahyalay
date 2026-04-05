@@ -64,13 +64,13 @@ function getFirstWinnerLastWinners($tournament, $resultDate, $players)
         $lastWinnerPigeonTime = $lastWinner->pigeon_time ?? '';
 
 
-        return "<div class='alert alert-info' role='alert' style='background-color:#ff0000;color:white'><strong>First Winner : <strong>{$firstWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$firstWinnerPigeonTime}</span><strong></strong></strong></div>
-                <div class='alert alert-info' role='alert' style='background-color:#ff0000;color:white'><strong>Last Winner : <strong>{$lastWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$lastWinnerPigeonTime}</span><strong></strong></strong></div>
+        return "<div class='alert alert-info pigeon-winner-alert' role='alert'><strong>First Winner : <strong>{$firstWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$firstWinnerPigeonTime}</span><strong></strong></strong></div>
+                <div class='alert alert-info pigeon-winner-alert' role='alert'><strong>Last Winner : <strong>{$lastWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$lastWinnerPigeonTime}</span><strong></strong></strong></div>
         ";
     } catch (\Throwable $th) {
         throw $th;
-        return "<div class='alert alert-info' role='alert' style='background-color:#ff0000;color:white'><strong>First Winner : <strong></strong></strong></div>
-                <div class='alert alert-info' role='alert' style='background-color:#ff0000;color:white'><strong>Last Winner : <strong></strong></strong></div>";
+        return "<div class='alert alert-info pigeon-winner-alert' role='alert'><strong>First Winner : <strong></strong></strong></div>
+                <div class='alert alert-info pigeon-winner-alert' role='alert'><strong>Last Winner : <strong></strong></strong></div>";
     }
 }
 

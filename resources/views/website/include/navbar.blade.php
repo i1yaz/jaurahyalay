@@ -1,8 +1,8 @@
 <style>
     /* Navbar background */
-    .bg-navbar {
+    /* .bg-navbar {
         background: linear-gradient(to right, rgba(63,0,255), rgb(75, 18, 243)) !important;
-    }
+    } */
 
     /* Navbar link color & font size */
     .navbar.bg-navbar .nav-link {
@@ -208,7 +208,7 @@
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="eventsDropdown" role="button" 
                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Events
+                Active Tournaments
             </a>
             <div class="dropdown-menu" aria-labelledby="eventsDropdown">
                 @foreach ($activeNavbarTournaments as $tournament)
