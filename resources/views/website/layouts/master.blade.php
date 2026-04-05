@@ -64,13 +64,6 @@
                     }
                 }
             }
-            //  else {
-            //     foreach ($sliders as $slider) {
-            //         if (!empty($slider->slider)) {
-            //             $images[] = asset('website/sliders/' . $slider->slider);
-            //         }
-            //     }
-            // }
         @endphp
 
         @if (count($images))

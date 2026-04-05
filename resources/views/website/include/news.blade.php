@@ -29,7 +29,7 @@
     }
 </style>
 
-<div class="container-fluid content">
+<div class="container-fluid">
     @if (isset($activeNews) && $activeNews->isNotEmpty())
     <section class="content-header">
       <div class="row news-ticker">
