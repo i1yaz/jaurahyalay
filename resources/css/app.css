@@ -267,3 +267,11 @@ h3{
     background-color: rgba(63,0,255);
     border-color: rgba(63,0,255);
 }
+
+.alert-danger-custom {
+    background-color: #ff0000;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    margin-top: 10px;
+}
