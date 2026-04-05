@@ -20,14 +20,18 @@
 
     @stack('css')
   </head>
-  <body class="hold-transition sidebar-mini">
+  <body class="hold-transition sidebar-mini @if(isset($isGuest) && $isGuest) sidebar-collapse @endif">
   <div class="wrapper">
 
+  @if(!(isset($isGuest) && $isGuest))
   @include('admin.include.topbar')
+  @endif
     <!-- Main Sidebar Container -->
+    @if(!(isset($isGuest) && $isGuest))
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-  @include('admin.include.sidebar-profile')
+      @include('admin.include.sidebar-profile')
     </aside>
+    @endif
 
     <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -52,7 +56,9 @@
     </aside>
     <!-- /.control-sidebar -->
 
+    @if(!(isset($isGuest) && $isGuest))
     @include('admin.include.footer')
+    @endif
   </div>
   <!-- ./wrapper -->
 

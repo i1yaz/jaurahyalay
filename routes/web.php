@@ -15,6 +15,16 @@ use App\Http\Controllers\Website\WebsiteController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/guest/result/edit/{result}/{date}', [ResultController::class, 'guestEdit'])
+    ->name('guest.result.edit')
+    ->middleware('signed');
+
+Route::post('/guest/result/time', [ResultController::class, 'guestTime'])
+    ->name('guest.result.time');
+
+Route::post('/guest/result/double-stamp', [ResultController::class, 'guestDoubleStamp'])
+    ->name('guest.result.double_stamp');
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes

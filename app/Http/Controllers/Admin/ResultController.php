@@ -16,8 +16,32 @@ class ResultController extends Controller
 
     public function __construct(WebsiteService $websiteService)
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['guestEdit', 'guestTime', 'guestDoubleStamp']);
         $this->websiteService = $websiteService;
+    }
+
+    public function guestEdit($tournament_id, $date)
+    {
+        $tournament = Tournament::findOrFail($tournament_id);
+
+        // Store guest permission in session
+        session()->put("guest_edit_{$tournament_id}_{$date}", true);
+
+        $tournamentResult = (new TournamentService)->getActiveTournamentForResult($tournament->id, $date);
+        $updateDate = $date;
+        $isGuest = true;
+
+        return view('admin.result.edit', compact('tournament', 'updateDate', 'tournamentResult', 'isGuest'));
+    }
+
+    public function guestTime(Request $request)
+    {
+        return $this->time($request);
+    }
+
+    public function guestDoubleStamp(Request $request)
+    {
+        return $this->doubleStamp($request);
     }
 
     public function index()
@@ -50,8 +74,9 @@ class ResultController extends Controller
             $date = ($date) ? $date : $this->getEditDefaultDate($tournament);
             $tournamentResult = (new TournamentService)->getActiveTournamentForResult($tournament->id, $date);
             $updateDate = (isset($date)) ? $date : $tournament->start_date;
+            $isGuest = false;
 
-            return view('admin.result.edit', compact('tournament', 'updateDate', 'tournamentResult'));
+            return view('admin.result.edit', compact('tournament', 'updateDate', 'tournamentResult', 'isGuest'));
         }
 
         return redirect()->back()->withErrors('Sorry You don\'t have permission!');

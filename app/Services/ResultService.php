@@ -605,7 +605,8 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
     {
         $data = explode('_', $request->pk);
         $tournament_id =  $data[0];
-        return (new TournamentService)->canEditThisTournament($tournament_id);
+        $date = $data[1]; // pk is [tournament_id, date, player_id, (pigeon_number|club_id)]
+        return (new TournamentService)->canEditThisTournament($tournament_id, $date);
     }
 
     /**

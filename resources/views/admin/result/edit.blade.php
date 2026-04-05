@@ -13,6 +13,14 @@
         padding-right: 3px;
         float: left;
     }
+    @if(isset($isGuest) && $isGuest)
+    .main-sidebar, .main-header, .content-header .breadcrumb, .main-footer, .control-sidebar {
+        display: none !important;
+    }
+    .content-wrapper {
+        margin-left: 0 !important;
+    }
+    @endif
 </style>
 @section('breadcrumb')
     <!-- Content Header (Page header) -->
@@ -38,9 +46,26 @@
                                 <span class="fas fa-copy"></span>
                             </button>
                         </li>
+                        @if(!(isset($isGuest) && $isGuest) && (Auth::user()->super_admin || Auth::user()->club_id > 0))
+                            @php
+                                $expiryHours = \App\Models\Admin\Setting::where('key', 'signed_url_expiry_hours')->first()->value ?? 24;
+                                $guestUrl = URL::temporarySignedRoute(
+                                    'guest.result.edit', 
+                                    now()->addHours($expiryHours), 
+                                    ['result' => $tournament->id, 'date' => $updateDate]
+                                );
+                            @endphp
+                            <li>
+                                <button type="button" class="btn btn-warning copy-to-clipboard" 
+                                    data-url="{{ $guestUrl }}" title="Copy Guest Link for {{ \Carbon\Carbon::parse($updateDate)->format('j F') }}">
+                                    <span class="fas fa-user-clock"></span>
+                                </button>
+                            </li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-sm-6">
+                    @if(!(isset($isGuest) && $isGuest))
                     <form action="{{ route('admin.result.update') }}" method="POST" class="float-right">
                         @csrf
                         @method('PATCH')
@@ -60,6 +85,7 @@
 
 
                     </form>
+                    @endif
                 </div>
             </div><!-- /.row -->
         </div><!-- /.container-fluid -->
@@ -73,11 +99,19 @@
             <div class="card-header p-0 pt-1">
                 <ul class="nav nav-tabs" id="ul-tournament-date" role="tablist">
                     @foreach ($tournament->flyingDays as $flyingDay)
-                        <li class="nav-item">
-                            <a class="nav-link li-tournament-date
-              @if (isset($updateDate) && $updateDate == $flyingDay->date) active @endif>"
-                                id="li-tournament-{{ $flyingDay->date }}" data-toggle="pill"
+                        @php
+                            $activeDate = (isset($updateDate) && $updateDate == $flyingDay->date);
+                        @endphp
+                        @if(!(isset($isGuest) && $isGuest) || $activeDate)
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="nav-link li-tournament-date @if ($activeDate) active @endif"
+                                id="li-tournament-{{ $flyingDay->date }}" 
+                                @if(!(isset($isGuest) && $isGuest))
+                                data-toggle="pill"
                                 href="{{ route('result.edit.date', ['result' => $tournament->id, 'date' => $flyingDay->date]) }}"
+                                @else
+                                href="javascript:void(0)"
+                                @endif
                                 role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">
                                 @php
                                     $date = \Carbon\Carbon::parse($flyingDay->date);
@@ -85,6 +119,7 @@
                                 @endphp
                             </a>
                         </li>
+                        @endif
                     @endforeach
                 </ul>
             </div>
@@ -246,7 +281,7 @@
             $('.pigeon').editable({
                 type: 'POST',
                 pk: $(this).data('pk'),
-                url: '{!! route('result.time') !!}',
+                url: '{!! (isset($isGuest) && $isGuest) ? route('guest.result.time') : route('result.time') !!}',
                 name: 'pigeon',
                 type: 'text',
                 validate: function(value) {
@@ -273,7 +308,7 @@
             $('.start').editable({
                 type: 'POST',
                 pk: $(this).data('pk'),
-                url: '{!! route('result.time') !!}',
+                url: '{!! (isset($isGuest) && $isGuest) ? route('guest.result.time') : route('result.time') !!}',
                 name: 'start',
                 type: 'text',
                 validate: function(value) {
@@ -301,7 +336,7 @@
                 var td = $el.closest('td');
 
                 $.ajax({
-                    url: '{{ route('result.double_stamp') }}',
+                    url: '{{ (isset($isGuest) && $isGuest) ? route('guest.result.double_stamp') : route('result.double_stamp') }}',
                     type: 'POST',
                     data: {pk: pk},
                     success: function (response) {

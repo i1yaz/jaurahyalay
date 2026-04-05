@@ -569,25 +569,38 @@ class TournamentService
         return $query->paginate($records);
     }
 
-    public function canEditThisTournament($tournament_id)
+    public function canEditThisTournament($tournament_id, $date = null)
     {
         $user = Auth::user();
 
-        if ($user->super_admin) {
-            return true;
+        if ($user) {
+            if ($user->super_admin) {
+                return true;
+            }
+
+            if ($user->club_id > 0) {
+                return Tournament::where('id', $tournament_id)
+                    ->where('club_id', $user->club_id)
+                    ->where('status', true)
+                    ->exists();
+            }
+
+            if (DB::table('tournament_moderator')
+                ->where('user_id', $user->id)
+                ->where('tournament_id', $tournament_id)
+                ->exists()) {
+                return true;
+            }
         }
 
-        if ($user->club_id > 0) {
-            return Tournament::where('id', $tournament_id)
-                ->where('club_id', $user->club_id)
-                ->where('status', true)
-                ->exists();
+        // Check for guest access via session
+        if ($date) {
+            return session()->get("guest_edit_{$tournament_id}_{$date}") === true;
         }
 
-        return DB::table('tournament_moderator')
-            ->where('user_id', $user->id)
-            ->where('tournament_id', $tournament_id)
-            ->exists();
+        // If no date provided, we might be checking for general editing permission.
+        // For guest, it's always date-specific.
+        return false;
     }
     public function getActiveTournamentForResult($tournament_id, $date)
     {
