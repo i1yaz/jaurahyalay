@@ -211,7 +211,7 @@
                 Events
             </a>
             <div class="dropdown-menu" aria-labelledby="eventsDropdown">
-                @foreach ($activeTournaments as $tournament)
+                @foreach ($activeNavbarTournaments as $tournament)
                     <a class="dropdown-item @if(isset($segmentTournament) && $tournament->id == $segmentTournament) active @endif"
                         href="{{ route('result.tournament', ['club_id' => $tournament->club_id, 'tournament_id' => $tournament->id]) }}">
                         {{ $tournament->name }}

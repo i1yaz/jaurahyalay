@@ -27,9 +27,12 @@ class WebsiteService
         return Club::where('status', false)->get();
     }
 
-    public function getActiveTournamentForWebsite(): Collection
+    public function getActiveTournamentForWebsite($nav=false): Collection
     {
-        return Tournament::where('show', true)->where('public_hide', false)->orderBy('sort')->get();
+        if($nav===true){
+            return Tournament::select(['id','name','club_id'])->where('start_date', '>=', now()->subDays(365)->toDateString())->where('public_hide', false)->orderBy('sort')->get();
+        }
+        return Tournament::select(['id','name','club_id'])->where('show', true)->where('public_hide', false)->orderBy('sort')->get();
     }
 
     public function getAllTournamentsOfThisClub($club)

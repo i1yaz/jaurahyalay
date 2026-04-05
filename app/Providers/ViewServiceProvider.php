@@ -26,17 +26,21 @@ class ViewServiceProvider extends ServiceProvider
             $result['activeTournaments'] = [];
             $result['activeNews'] = [];
             $result['sliders'] = [];
+            $result['activeNavbarTournaments'] = [];
+            
             $result = Cache::store('remember_forever_cache_store')->remember('shared-data', now()->addMinutes(1440), function () {
                 $data = [];
                 $data['activeClubs'] = (new WebsiteService())->getAllActiveClubs();
                 $data['activeNews'] = (new WebsiteService())->getActiveNews();
                 $data['activeTournaments'] = (new WebsiteService())->getActiveTournamentForWebsite();
+                $data['activeNavbarTournaments'] = (new WebsiteService())->getActiveTournamentForWebsite(true);
                 $data['sliders'] = (new WebsiteService())->getAllSliders();
                 return $data;
             });
             $view->with([
                 'activeClubs' => $result['activeClubs'],
                 'activeTournaments' => $result['activeTournaments'],
+                'activeNavbarTournaments' => $result['activeNavbarTournaments'],
                 'activeNews' => $result['activeNews'],
                 'sliders' => $result['sliders'],
             ]);
