@@ -1,3 +1,9 @@
+@php
+    $websiteService = new \App\Services\WebsiteService();
+    $previousDate = $websiteService->getPreviousDay($tournament,$resultDate);
+    $shortPigeons = $websiteService->getPreviousDayShortPigeons($tournament,$previousDate);
+@endphp
+
 {!! getFirstWinnerLastWinners($tournament,$resultDate,$players) !!}
 <div class="table-responsive card" style="overflow:scroll!important;">
     <table class="table table-striped table-bordered table-hover results" id="results">
@@ -21,6 +27,9 @@
                 $results = $players->get($data->player_id);
                 $player = $tournament->players->where('id',$data->player_id)->first();
                 $playerFlyingTime = (!isset($results->first()->start_time))?'':$results->first()->start_time;
+                if (!empty($shortPigeons) && $shortPigeons->isNotEmpty()) {
+                    $shortPigeonsOfPlayer = $shortPigeons->where('player_id',$data->player_id);
+                }
             @endphp
           @if($player)
             <tr>
@@ -61,8 +70,13 @@
                             $res=false;
                         }
 
+                        $isShort = false;
+                        if (!empty($shortPigeonsOfPlayer) && $shortPigeonsOfPlayer->isNotEmpty()) {
+                            $isShort = $shortPigeonsOfPlayer->where('pigeon_number', $i+1)->first();
+                        }
+
                     @endphp
-                    <td @if($res) class="blink" @endif>
+                    <td @if($res) class="blink" @endif  @if($isShort)  style="background: #fcf8e3!important;color: #fff" @endif>
                         @php
                             if(isset($pigeonTime->pigeon_time)){ echo $pigeonTime->pigeon_time;}
                         @endphp
