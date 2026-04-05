@@ -27,9 +27,17 @@
                     </div>
                 </div><!-- /.col -->
                 <div class="col-md-6">
-                    <ul style="list-style-type: none;padding: 0;margin: 0;">
-                        <a target="_blank" href="https://wa.me/?text={{ url("result/default/{$tournament->id}") }}"
-                            class="btn btn-success"><span class="fab fa-whatsapp"></span></a>
+                    <ul style="list-style-type: none;padding: 0;margin: 0; display: flex; gap: 5px;">
+                        <li>
+                            <a target="_blank" href="https://wa.me/?text={{ url("result/default/{$tournament->id}") }}"
+                                class="btn btn-success" title="Share on WhatsApp"><span class="fab fa-whatsapp"></span></a>
+                        </li>
+                        <li>
+                            <button type="button" class="btn btn-info copy-to-clipboard"
+                                data-url="{{ url("result/default/{$tournament->id}") }}" title="Copy Link">
+                                <span class="fas fa-copy"></span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-sm-6">
@@ -190,6 +198,37 @@
             }
         });
         $(document).ready(function(e) {
+            $('.copy-to-clipboard').click(function() {
+                var url = $(this).data('url');
+                var $btn = $(this);
+                var $icon = $btn.find('span');
+
+                navigator.clipboard.writeText(url).then(function() {
+                    $icon.removeClass('fa-copy').addClass('fa-check');
+                    $btn.removeClass('btn-info').addClass('btn-success');
+
+                    setTimeout(function() {
+                        $icon.removeClass('fa-check').addClass('fa-copy');
+                        $btn.removeClass('btn-success').addClass('btn-info');
+                    }, 2000);
+                }, function(err) {
+                    console.error('Async: Could not copy text: ', err);
+                    // Fallback for older browsers
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val(url).select();
+                    document.execCommand("copy");
+                    $temp.remove();
+                    
+                    $icon.removeClass('fa-copy').addClass('fa-check');
+                    $btn.removeClass('btn-info').addClass('btn-success');
+                    setTimeout(function() {
+                        $icon.removeClass('fa-check').addClass('fa-copy');
+                        $btn.removeClass('btn-success').addClass('btn-info');
+                    }, 2000);
+                });
+            });
+
             $.fn.editableform.buttons =
                 '<button type="submit" class="btn btn-primary btn-sm editable-submit">' +
                 '<i class="fa fa-check" aria-hidden="true"></i>' +
