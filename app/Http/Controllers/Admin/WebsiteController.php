@@ -85,6 +85,21 @@ class WebsiteController extends Controller
         $this->websiteService->flushCache();
         if ($response1 && $response2) {
             return redirect('admin/website')->with('success', 'Setting has been saved!');
+        }
+    }
+
+    public function updateGuestLinkSettings(Request $request)
+    {
+        $response = Setting::updateOrCreate(
+            ['key' => 'signed_url_expiry_hours'],
+            [
+                'group_type' => Setting::GUEST_LINK_GROUP,
+                'value' => $request->signed_url_expiry_hours
+            ]
+        );
+        $this->websiteService->flushCache();
+        if ($response) {
+            return redirect('admin/website')->with('success', 'Setting has been saved!');
         } else {
             return redirect()->back()->withErrors('Something is wrong!');
         }

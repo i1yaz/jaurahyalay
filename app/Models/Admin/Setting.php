@@ -18,4 +18,5 @@ class Setting extends Model
 
     const FIRST_WINNER_LAST_WINNER_GROUP = 'first_winner_last_winner';
     const AUTO_UPDATE_TIME_GROUP = 'auto_update_time';
+    const GUEST_LINK_GROUP = 'guest_link_expiry';
 }

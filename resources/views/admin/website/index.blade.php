@@ -35,5 +35,6 @@
 @section('content')
     @include('admin.website.settings.sliders')
     @include('admin.website.settings.auto_update_time')
+    @include('admin.website.settings.guest_link')
     @include('admin.website.settings.first_winner_last_winner')
 @endsection

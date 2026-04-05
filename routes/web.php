@@ -81,6 +81,7 @@ Route::group(['middleware' => 'auth'], function () {
         // All Super Admin Routes
         Route::resource('admin/website', AdminWebsiteController::class);
         Route::post('admin/auto-update-time', [AdminWebsiteController::class, 'autoUpdateTime'])->name('website.auto_update_time');
+        Route::post('admin/guest-link-settings', [AdminWebsiteController::class, 'updateGuestLinkSettings'])->name('website.guest_link_settings');
         Route::post('admin/first-winner-last-winner', [AdminWebsiteController::class, 'firstWinnerLastWinnerConditions'])->name('website.first_winner_last_winner');
         Route::resource('admin/user', UserController::class);
         Route::post('admin/player/bulk-delete', [PlayerController::class, 'bulkDelete'])->name('player.bulk_delete');
