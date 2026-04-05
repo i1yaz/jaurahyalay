@@ -32,7 +32,7 @@
 <div class="container-fluid content">
     @if (isset($activeNews) && $activeNews->isNotEmpty())
     <section class="content-header">
-      <div class="row alert-danger-custom">
+      <div class="row news-ticker">
           <div class="col-lg-12">
               <div class="news-ticker-wrapper mt-2 pb-2" style="line-height: 1.8; padding-top: 8px;">
                   <div class="news-ticker-content">

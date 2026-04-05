@@ -3,12 +3,15 @@
     --primary-blue: rgb(17, 138, 178);
     --primary-blue-alt: rgba(7, 59, 76);
     --primary-blue-solid: #007bff;
-    --news-bar: #EF476F;
+
     --bg-odd-table-color: #d1fff3;  /* Table odd color */
     --bg-hover-green: #FFD166; /* Table Hover */
     /* First/Last Pigeon Winner Colors */
     --first-last-pigeons-bg: #EF476F;
     --first-last-pigeons-text: #ffffff;
+    --first-last-pigeons-gradient: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
+    /* News Bar Gradient */
+    --news-bar-gradient: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
 
     /* Accent Colors */
     
@@ -306,9 +309,9 @@ h3{
     border-color: var(--primary-blue);
 }
 
-.alert-danger-custom,
+.news-ticker,
 .pigeon-winner-alert {
-    background: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
+    background: var(--news-bar-gradient);
     padding: 10px;
     border-radius: 5px;
     color: var(--text-white);
@@ -318,7 +321,7 @@ h3{
     box-shadow: 0 10px 25px rgba(239, 71, 111, 0.18);
 }
 
-.alert-danger-custom::before,
+.news-ticker::before,
 .pigeon-winner-alert::before {
     content: "";
     position: absolute;
