@@ -4,7 +4,7 @@
     --primary-blue-alt: rgba(7, 59, 76);
     --primary-blue-solid: #007bff;
     --news-bar: #EF476F;
-    --bg-pink-tint: #d1fff3;  /* Table odd color */
+    --bg-odd-table-color: #d1fff3;  /* Table odd color */
     --bg-hover-green: #FFD166; /* Table Hover */
     /* First/Last Pigeon Winner Colors */
     --first-last-pigeons-bg: #EF476F;
@@ -253,7 +253,7 @@ h3{
 }
 
 .table-striped>tbody>tr:nth-of-type(odd) {
-    background-color: var(--bg-pink-tint);
+    background-color: var(--bg-odd-table-color);
 }
 
 .table-striped>tbody>tr {
@@ -306,15 +306,32 @@ h3{
     border-color: var(--primary-blue);
 }
 
-.alert-danger-custom {
-    background-color: var(--news-bar);
+.alert-danger-custom,
+.pigeon-winner-alert {
+    background: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
     padding: 10px;
     border-radius: 5px;
     color: var(--text-white);
     margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(239, 71, 111, 0.18);
+}
+
+.alert-danger-custom::before,
+.pigeon-winner-alert::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -30%;
+    width: 30%;
+    height: 220%;
+    background: rgba(255, 255, 255, 0.45);
+    transform: rotate(25deg);
+    filter: blur(12px);
+    animation: shine 3.2s ease-in-out infinite;
 }
 
 .pigeon-winner-alert {
-    background-color: var(--first-last-pigeons-bg);
-    color: var(--first-last-pigeons-text);
+    color: var(--text-white);
 }
