@@ -46,7 +46,8 @@
                   <th>Show on Front Page</th>
                   <th>Hide From Public</th>
                   <th>Sort</th>
-                  <th>delete</th>
+                  <th>Edit</th>
+                  <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,6 +89,8 @@
 
                     <td>
                         <a href="{{ route('club_admin.tournament.edit',$tournament->id) }}"><span class="fas fa-edit" ></span></a>
+                    </td>
+                    <td>
                         <form id="delete-form-{{ $tournament->id }}" method="post" action="{{ route('club_admin.tournament.destroy',$tournament->id) }}" style="display: none">
                         {{ csrf_field() }}
                         {{ method_field('DELETE') }}

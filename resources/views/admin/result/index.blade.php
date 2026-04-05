@@ -15,8 +15,12 @@
         .event img.poster {
             float: left;
             margin-right: 10px;
-            width: 200px;
-            height: 250px;
+            max-width: 400px;
+            max-height: 400px;
+            width: auto;
+            height: auto;
+            border: none;
+            padding: 0;
         }
     </style>
 @endpush
@@ -83,8 +87,7 @@
                                                     @else
                                                         data-src="{{asset('website/img/200x250.png')}}"
                                                     @endif
-                                                    class="img-thumbnail img-responsive poster lozad"
-                                                    height="250" width="200"
+                                                    class="img-responsive poster lozad"
                                                     alt="">
                                             </div>
                                         </td>
