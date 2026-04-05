@@ -46,22 +46,6 @@
                                 <span class="fas fa-copy"></span>
                             </button>
                         </li>
-                        @if(!(isset($isGuest) && $isGuest) && (Auth::user()->super_admin || Auth::user()->club_id > 0))
-                            @php
-                                $expiryHours = \App\Models\Admin\Setting::where('key', 'signed_url_expiry_hours')->first()->value ?? 24;
-                                $guestUrl = URL::temporarySignedRoute(
-                                    'guest.result.edit', 
-                                    now()->addHours($expiryHours), 
-                                    ['result' => $tournament->id, 'date' => $updateDate]
-                                );
-                            @endphp
-                            <li>
-                                <button type="button" class="btn btn-warning copy-to-clipboard" 
-                                    data-url="{{ $guestUrl }}" title="Copy Guest Link for {{ \Carbon\Carbon::parse($updateDate)->format('j F') }}">
-                                    <span class="fas fa-user-clock"></span>
-                                </button>
-                            </li>
-                        @endif
                     </ul>
                 </div>
                 <div class="col-sm-6">
@@ -85,6 +69,21 @@
 
 
                     </form>
+
+                    @if(!(isset($isGuest) && $isGuest) && (Auth::user()->super_admin || Auth::user()->club_id > 0))
+                        @php
+                            $expiryHours = \App\Models\Admin\Setting::where('key', 'signed_url_expiry_hours')->first()->value ?? 24;
+                            $guestUrl = URL::temporarySignedRoute(
+                                'guest.result.edit', 
+                                now()->addHours($expiryHours), 
+                                ['result' => $tournament->id, 'date' => $updateDate]
+                            );
+                        @endphp
+                        <button type="button" class="btn btn-warning copy-to-clipboard float-right mr-2" 
+                            data-url="{{ $guestUrl }}" title="Copy Guest Link for {{ \Carbon\Carbon::parse($updateDate)->format('j F') }}">
+                            <span class="fas fa-user-clock"></span> Guest Link
+                        </button>
+                    @endif
                     @endif
                 </div>
             </div><!-- /.row -->
