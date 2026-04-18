@@ -79,9 +79,10 @@
                     </td>
                     <td>
                       @if(!$tournament->public_hide)
-                      <span class="badge badge-danger">Hide</span>
-                      @else
+                      <strong></strong>
                       <span class="badge badge-success">Show</span>
+                      @else
+                      <span class="badge badge-danger">Hide</span>
                       @endif
                     </td>
                     <td>{{ $tournament->sort}}</td>
