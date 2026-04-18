@@ -53,9 +53,9 @@
         @php
             $images = [];
 
-            if (isset($tournament) && $tournament->poster) {
-                $images[] = asset('uploads/' . $tournament->poster);
-            }
+            // if (isset($tournament) && $tournament->poster) {
+            //     $images[] = asset('uploads/' . $tournament->poster);
+            // }
 
             if (empty($images) && isset($sliders) && $sliders->count()) {
                 foreach ($sliders as $slider) {

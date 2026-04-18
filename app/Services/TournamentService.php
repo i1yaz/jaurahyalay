@@ -379,7 +379,7 @@ class TournamentService
             }
             $image = Image::make($request->poster)
                 ->encode('webp', 80)
-                ->resize(1280, 250);
+                ->resize(200, 250);
 
 
             Storage::disk('r2')->put("{$prefix}/uploads/{$filename}.webp", $image->stream());
