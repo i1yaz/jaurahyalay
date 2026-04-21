@@ -44,7 +44,7 @@
                   <th>Start Date #</th>
                   <th>Show in Results</th>
                   <th>Show on Front Page</th>
-                  <th>Hide From Public</th>
+                  {{-- <th>Hide From Public</th> --}}
                   <th>Sort</th>
                   <th>Activate</th>
                   <th>Edit</th>

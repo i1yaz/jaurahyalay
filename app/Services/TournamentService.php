@@ -197,7 +197,7 @@ class TournamentService
         $this->updatePlayerTournamentTotals($tournament);
     }
 
-    private function updateTournamentPlayerStartTimes(Tournament $tournament): void
+        private function updateTournamentPlayerStartTimes(Tournament $tournament): void
     {
         $pigeonCount = $tournament->pigeons ?? 0;
 
@@ -206,15 +206,10 @@ class TournamentService
         }
 
         // Clean up existing records ONLY if we need to. Actually, we should specifically NOT delete anything here
-        // Instead, we will use insertOrIgnore so we only create MISSING rows, and NEVER touch existing rows!
+        // Instead, we will use upsert to create MISSING rows and update existing rows with new start_time!
 
         $resultData = [];
         $now = Carbon::now();
-        $playerWithChangedStartTime = DB::table('results')->select(['player_id','start_time'])->where('tournament_id', $tournament->id)
-            ->where('start_time','!=' ,$tournament->start_time)
-            ->groupBy('player_id')
-            ->pluck( 'start_time','player_id')
-            ->toArray();
 
         // Safety: If pigeon count was reduced, delete the dangling extra pigeons first!
         Result::where('tournament_id', $tournament->id)
@@ -225,9 +220,7 @@ class TournamentService
 
         foreach ($tournament->flyingDays as $day) {
             foreach ($tournament->players as $player) {
-                $startTime = ( isset($playerWithChangedStartTime[$player->id])  && $playerWithChangedStartTime[$player->id] != null)
-                    ? $playerWithChangedStartTime[$player->id] 
-                    : $tournament->start_time;
+                $startTime = $tournament->start_time;
 
                 for ($i = 1; $i <= $pigeonCount; $i++) {
                     $resultData[] = [
@@ -242,10 +235,10 @@ class TournamentService
                 }
             }
         }
-        
+
         // Process in batches
         $uniqueColumns = ['player_id', 'tournament_id', 'date', 'pigeon_number'];
-        $updateColumns = ['updated_at']; // WE INTENTIONALLY DO NOT UPDATE start_time HERE TO PRESERVE CUSTOM EDITS
+        $updateColumns = ['start_time', 'updated_at']; // Update start_time to the tournament's new start_time
 
         foreach (array_chunk($resultData, self::BATCH_SIZE) as $batch) {
             DB::table('results')->upsert($batch, $uniqueColumns, $updateColumns);
