@@ -115,6 +115,11 @@ class TournamentService
             Result::where('tournament_id', $tournament->id)
                 ->whereIn('date', $datesToRemove)
                 ->delete();
+
+            DB::table('player_tournament_total')
+                ->where('tournament_id', $tournament->id)
+                ->whereIn('date', $datesToRemove)
+                ->delete();
         }
     }
 
