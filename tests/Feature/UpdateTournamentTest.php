@@ -24,38 +24,6 @@ class UpdateTournamentTest extends TestCase
         $this->adminUser = User::factory()->create([
             'super_admin' => 1,
         ]);
-
-        \Illuminate\Support\Facades\Schema::dropIfExists('news');
-        \Illuminate\Support\Facades\Schema::create('news', function ($table) {
-            $table->id();
-            $table->string('title')->nullable();
-            $table->text('description')->nullable();
-            $table->boolean('show')->default(1);
-            $table->timestamps();
-        });
-        
-        \Illuminate\Support\Facades\Schema::dropIfExists('sliders');
-        \Illuminate\Support\Facades\Schema::create('sliders', function ($table) {
-            $table->id();
-            $table->boolean('show')->default(1);
-            $table->timestamps();
-        });
-        
-        \Illuminate\Support\Facades\Schema::dropIfExists('sponsors');
-        \Illuminate\Support\Facades\Schema::create('sponsors', function ($table) {
-            $table->id();
-            $table->boolean('show')->default(1);
-            $table->timestamps();
-        });
-        
-        \Illuminate\Support\Facades\Schema::dropIfExists('tournament_prizes');
-        \Illuminate\Support\Facades\Schema::create('tournament_prizes', function ($table) {
-            $table->id();
-            $table->unsignedBigInteger('tournament_id');
-            $table->string('name');
-            $table->string('position');
-            $table->timestamps();
-        });
     }
 
     /**
@@ -174,5 +142,179 @@ class UpdateTournamentTest extends TestCase
         // Critical Check: Are there 3 admins in the moderator table?
         $moderatorCount = DB::table('tournament_moderator')->where('tournament_id', $tournament->id)->count();
         $this->assertEquals(3, $moderatorCount, "Failed to sync all moderators. Only $moderatorCount were saved instead of 3.");
+    }
+
+    /**
+     * Verify that when Admin updates start_time or helper pigeons, player times are recalculated.
+     */
+    public function test_admin_updating_start_time_or_helper_pigeon_recalculates_times()
+    {
+        $club = Club::factory()->create();
+        $tournament = Tournament::factory()->create([
+            'pigeons' => 3,
+            'supporter' => 0,
+            'club_id' => $club->id,
+            'start_time' => '06:00:00',
+            'status' => 1
+        ]);
+        $player = Player::factory()->create();
+        $tournament->players()->attach($player->id);
+        $date = now()->format('Y-m-d');
+        \App\Models\Admin\TournamentFlyingDay::factory()->create(['tournament_id' => $tournament->id, 'date' => $date]);
+
+        // Setup baseline result
+        $service = new \App\Services\TournamentService();
+        $this->updateTournamentPlayerData($service, $tournament);
+
+        // Put pigeon times for player:
+        // Pigeon 1 at 08:00:00 (2 hrs / 7200s)
+        // Pigeon 2 at 09:00:00 (3 hrs / 10800s)
+        // Pigeon 3 at 10:00:00 (4 hrs / 14400s)
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->update(['pigeon_time' => '08:00:00', 'time_in_seconds' => 7200, 'pigeon_total' => 7200]);
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->update(['pigeon_time' => '09:00:00', 'time_in_seconds' => 10800, 'pigeon_total' => 10800]);
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->update(['pigeon_time' => '10:00:00', 'time_in_seconds' => 14400, 'pigeon_total' => 14400]);
+
+        // Save total to 32400 (7200 + 10800 + 14400)
+        DB::table('player_tournament_total')->where(['player_id' => $player->id])->update(['total' => 32400]);
+
+        // 1. Admin updates start_time to 07:00:00
+        $this->actingAs($this->adminUser)->patch(route('tournament.update', $tournament->id), [
+            'name' => $tournament->name,
+            'club' => $club->id,
+            'days' => 1,
+            'pigeons' => 3,
+            'time' => '07:00:00', // NEW START TIME
+            'date' => [now()->format('m/d/Y')],
+            'players' => [$player->id],
+            'status' => 'on',
+            'supporter' => 0,
+            'type' => 'OPEN',
+        ])->assertRedirect();
+
+        // Verification: Start times should be updated, and durations recalculated:
+        // Pigeon 1: 07:00 to 08:00 (1 hr / 3600s)
+        // Pigeon 2: 07:00 to 09:00 (2 hrs / 7200s)
+        // Pigeon 3: 07:00 to 10:00 (3 hrs / 10800s)
+        // Total = 21600s
+        $this->assertEquals(3600, Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->value('time_in_seconds'));
+        $this->assertEquals(7200, Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->value('time_in_seconds'));
+        $this->assertEquals(10800, Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->value('time_in_seconds'));
+        $this->assertEquals(21600, DB::table('player_tournament_total')->where(['player_id' => $player->id])->value('total'));
+
+        // 2. Admin updates helper pigeon (supporter) to 1
+        $this->actingAs($this->adminUser)->patch(route('tournament.update', $tournament->id), [
+            'name' => $tournament->name,
+            'club' => $club->id,
+            'days' => 1,
+            'pigeons' => 3,
+            'time' => '07:00:00',
+            'date' => [now()->format('m/d/Y')],
+            'players' => [$player->id],
+            'status' => 'on',
+            'supporter' => 1, // NEW SUPPORTER COUNT
+            'type' => 'OPEN',
+        ])->assertRedirect();
+
+        // Verification: Lowest pigeon (Pigeon 1, 3600s) must be dropped to 0 in pigeon_total.
+        // Total should become 7200 + 10800 = 18000s.
+        $this->assertEquals(0, Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->value('pigeon_total'));
+        $this->assertEquals(7200, Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->value('pigeon_total'));
+        $this->assertEquals(10800, Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->value('pigeon_total'));
+        $this->assertEquals(18000, DB::table('player_tournament_total')->where(['player_id' => $player->id])->value('total'));
+    }
+
+    /**
+     * Verify that when Club Admin updates start_time or helper pigeons, player times are recalculated.
+     */
+    public function test_club_admin_updating_start_time_or_helper_pigeon_recalculates_times()
+    {
+        $club = Club::factory()->create();
+        $clubAdminUser = User::factory()->create([
+            'super_admin' => 0,
+            'club_id' => $club->id
+        ]);
+
+        $tournament = Tournament::factory()->create([
+            'pigeons' => 3,
+            'supporter' => 0,
+            'club_id' => $club->id,
+            'start_time' => '06:00:00',
+            'status' => 1
+        ]);
+        $player = Player::factory()->create();
+        $tournament->players()->attach($player->id);
+        $date = now()->format('Y-m-d');
+        \App\Models\Admin\TournamentFlyingDay::factory()->create(['tournament_id' => $tournament->id, 'date' => $date]);
+
+        // Setup baseline result
+        $service = new \App\Services\TournamentService();
+        $this->updateTournamentPlayerData($service, $tournament);
+
+        // Put pigeon times for player:
+        // Pigeon 1 at 08:00:00 (2 hrs / 7200s)
+        // Pigeon 2 at 09:00:00 (3 hrs / 10800s)
+        // Pigeon 3 at 10:00:00 (4 hrs / 14400s)
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->update(['pigeon_time' => '08:00:00', 'time_in_seconds' => 7200, 'pigeon_total' => 7200]);
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->update(['pigeon_time' => '09:00:00', 'time_in_seconds' => 10800, 'pigeon_total' => 10800]);
+        Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->update(['pigeon_time' => '10:00:00', 'time_in_seconds' => 14400, 'pigeon_total' => 14400]);
+
+        // Save total to 32400 (7200 + 10800 + 14400)
+        DB::table('player_tournament_total')->where(['player_id' => $player->id])->update(['total' => 32400]);
+
+        // 1. Club Admin updates start_time to 07:00:00
+        $this->actingAs($clubAdminUser)->patch(route('club_admin.tournament.update', $tournament->id), [
+            'name' => $tournament->name,
+            'club' => $club->id,
+            'days' => 1,
+            'pigeons' => 3,
+            'time' => '07:00:00', // NEW START TIME
+            'date' => [now()->format('m/d/Y')],
+            'players' => [$player->id],
+            'status' => 'on',
+            'supporter' => 0,
+            'type' => 'OPEN',
+        ])->assertRedirect();
+
+        // Verification: Start times should be updated, and durations recalculated:
+        // Pigeon 1: 07:00 to 08:00 (1 hr / 3600s)
+        // Pigeon 2: 07:00 to 09:00 (2 hrs / 7200s)
+        // Pigeon 3: 07:00 to 10:00 (3 hrs / 10800s)
+        // Total = 21600s
+        $this->assertEquals(3600, Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->value('time_in_seconds'));
+        $this->assertEquals(7200, Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->value('time_in_seconds'));
+        $this->assertEquals(10800, Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->value('time_in_seconds'));
+        $this->assertEquals(21600, DB::table('player_tournament_total')->where(['player_id' => $player->id])->value('total'));
+
+        // 2. Club Admin updates helper pigeon (supporter) to 1
+        $this->actingAs($clubAdminUser)->patch(route('club_admin.tournament.update', $tournament->id), [
+            'name' => $tournament->name,
+            'club' => $club->id,
+            'days' => 1,
+            'pigeons' => 3,
+            'time' => '07:00:00',
+            'date' => [now()->format('m/d/Y')],
+            'players' => [$player->id],
+            'status' => 'on',
+            'supporter' => 1, // NEW SUPPORTER COUNT
+            'type' => 'OPEN',
+        ])->assertRedirect();
+
+        // Verification: Lowest pigeon (Pigeon 1, 3600s) must be dropped to 0 in pigeon_total.
+        // Total should become 7200 + 10800 = 18000s.
+        $this->assertEquals(0, Result::where(['player_id' => $player->id, 'pigeon_number' => 1])->value('pigeon_total'));
+        $this->assertEquals(7200, Result::where(['player_id' => $player->id, 'pigeon_number' => 2])->value('pigeon_total'));
+        $this->assertEquals(10800, Result::where(['player_id' => $player->id, 'pigeon_number' => 3])->value('pigeon_total'));
+        $this->assertEquals(18000, DB::table('player_tournament_total')->where(['player_id' => $player->id])->value('total'));
+    }
+
+    /**
+     * Helper to invoke private updateTournamentPlayerData
+     */
+    private function updateTournamentPlayerData($service, $tournament)
+    {
+        $reflection = new \ReflectionClass($service);
+        $method = $reflection->getMethod('updateTournamentPlayerData');
+        $method->setAccessible(true);
+        $method->invokeArgs($service, [$tournament]);
     }
 }

@@ -118,6 +118,8 @@ class ResultCalculationTest extends TestCase
      */
     public function test_supporter_tournament_calculations()
     {
+        $this->withoutExceptionHandling();
+
         $club = Club::factory()->create();
         $tournament = Tournament::factory()->create(['pigeons' => 7, 'supporter' => 1, 'club_id' => $club->id, 'status' => 1]);
         $player = Player::factory()->create(['club_id' => $club->id]);
@@ -174,7 +176,7 @@ class ResultCalculationTest extends TestCase
         $pigeon7->delete();
         // Since we bypassed normal HTTP for deletion, manually run calculation. Wait, system uses update to empty?
         // Usually, in X-editable, setting empty updates value to '' or '0'
-        $this->actingAs($this->adminUser)->postJson(route('result.time'), [
+        $res = $this->actingAs($this->adminUser)->postJson(route('result.time'), [
             'pk' => "{$tournament->id}_{$date}_{$player->id}_7_{$club->id}",
             'name' => 'pigeon',
             'value' => '', // or 0

@@ -25,7 +25,7 @@ class TournamentService
 {
     private const BATCH_SIZE = 1000;
 
-    public function updateTournament(Request $request, Tournament $tournament): Tournament
+        public function updateTournament(Request $request, Tournament $tournament): Tournament
     {
         return DB::transaction(function () use ($request, $tournament) {
             try {
@@ -34,6 +34,9 @@ class TournamentService
 
                 // Handle show homepage logic
                 $this->handleShowHomePage($request);
+
+                // Capture the OLD start time before any updates happen
+                $oldStartTime = $tournament->start_time;
 
                 // Load tournament with relationships once
                 $tournament = $this->loadTournamentWithRelations($tournament->id);
@@ -53,8 +56,8 @@ class TournamentService
                 // for the updateTournamentPlayerData logic.
                 $freshTournament = Tournament::with(['players', 'flyingDays'])->find($tournament->id);
 
-                // Update tournament-related data using the fresh model instance
-                $this->updateTournamentPlayerData($freshTournament);
+                // Update tournament-related data using the fresh model instance, passing the old start time
+                $this->updateTournamentPlayerData($freshTournament, $oldStartTime);
                 
                 return $freshTournament;
             } catch (\Exception $e) {
@@ -196,13 +199,14 @@ class TournamentService
             ->delete();
     }
 
-    private function updateTournamentPlayerData(Tournament $tournament): void
+    public function updateTournamentPlayerData(Tournament $tournament, ?string $oldStartTime = null): void
     {
-        $this->updateTournamentPlayerStartTimes($tournament);
-        $this->updatePlayerTournamentTotals($tournament);
+        $tournament->load(['players', 'flyingDays']);
+        $this->updateTournamentPlayerStartTimes($tournament, $oldStartTime);
+        (new ResultService())->recalculateTournamentSupporterLogic($tournament);
     }
 
-        private function updateTournamentPlayerStartTimes(Tournament $tournament): void
+    private function updateTournamentPlayerStartTimes(Tournament $tournament, ?string $oldStartTime = null): void
     {
         $pigeonCount = $tournament->pigeons ?? 0;
 
@@ -221,14 +225,28 @@ class TournamentService
             ->where('pigeon_number', '>', $pigeonCount)
             ->delete();
 
-        $resultData = [];
+        // If oldStartTime is not provided (e.g. during create), fallback to current start_time
+        $referenceTime = $oldStartTime ?? $tournament->start_time;
+
+        $playerWithChangedStartTime = DB::table('results')
+            ->select(['player_id', 'start_time'])
+            ->where('tournament_id', $tournament->id)
+            ->whereNotNull('start_time')
+            ->where('start_time', '!=', $referenceTime)
+            ->groupBy('player_id')
+            ->pluck('start_time', 'player_id')
+            ->toArray();
+
+        $uniqueColumns = ['player_id', 'tournament_id', 'date', 'pigeon_number'];
+        $updateColumns = ['start_time', 'updated_at'];
+        $batchResultData = [];
 
         foreach ($tournament->flyingDays as $day) {
             foreach ($tournament->players as $player) {
-                $startTime = $tournament->start_time;
+                $startTime = ($playerWithChangedStartTime[$player->id] ?? null) ?: $tournament->start_time;
 
                 for ($i = 1; $i <= $pigeonCount; $i++) {
-                    $resultData[] = [
+                    $batchResultData[] = [
                         'player_id' => $player->id,
                         'tournament_id' => $tournament->id,
                         'pigeon_number' => $i,
@@ -237,17 +255,63 @@ class TournamentService
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
+
+                    // Upsert every 500 records to keep memory usage low
+                    if (count($batchResultData) >= 500) {
+                        DB::table('results')->upsert($batchResultData, $uniqueColumns, $updateColumns);
+                        $batchResultData = [];
+                    }
                 }
             }
         }
 
-        // Process in batches
-        $uniqueColumns = ['player_id', 'tournament_id', 'date', 'pigeon_number'];
-        $updateColumns = ['start_time', 'updated_at']; // Update start_time to the tournament's new start_time
-
-        foreach (array_chunk($resultData, self::BATCH_SIZE) as $batch) {
-            DB::table('results')->upsert($batch, $uniqueColumns, $updateColumns);
+        // Final upsert for remaining records
+        if (!empty($batchResultData)) {
+            DB::table('results')->upsert($batchResultData, $uniqueColumns, $updateColumns);
         }
+
+        // Recalculate pigeon totals using chunking to save memory
+        $emptyTimeValues = ['00:00:00', '000000', '0000', '00:00', '00', ''];
+
+        DB::table('results')
+            ->where('tournament_id', $tournament->id)
+            ->whereNotNull('pigeon_time')
+            ->orderBy('id')
+            ->chunk(500, function ($records) use ($emptyTimeValues) {
+                $recalcData = [];
+                foreach ($records as $record) {
+                    if (!in_array($record->pigeon_time, $emptyTimeValues, true) && $record->start_time) {
+                        try {
+                            $startTime = ResultService::ensureColons($record->start_time);
+                            $pigeonTime = ResultService::ensureColons($record->pigeon_time);
+                            $pigeonTotal = Carbon::parse($startTime)->diffInSeconds(Carbon::parse($pigeonTime));
+                            $isDropped = ($record->pigeon_total == 0 && $record->time_in_seconds > 0);
+
+                            $recalcData[] = [
+                                'id' => $record->id,
+                                'player_id' => $record->player_id,
+                                'tournament_id' => $record->tournament_id,
+                                'date' => $record->date,
+                                'pigeon_number' => $record->pigeon_number,
+                                'start_time' => $record->start_time,
+                                'pigeon_time' => $record->pigeon_time,
+                                'pigeon_total' => $isDropped ? 0 : $pigeonTotal,
+                                'time_in_seconds' => $pigeonTotal,
+                            ];
+                        } catch (\Exception $e) {
+                            continue;
+                        }
+                    }
+                }
+
+                if (!empty($recalcData)) {
+                    DB::table('results')->upsert(
+                        $recalcData,
+                        ['player_id', 'tournament_id', 'date', 'pigeon_number'],
+                        ['pigeon_total', 'time_in_seconds']
+                    );
+                }
+            });
     }
 
     private function updatePlayerTournamentTotals(Tournament $tournament): void

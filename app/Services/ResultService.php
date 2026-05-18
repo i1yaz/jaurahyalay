@@ -28,7 +28,7 @@ class ResultService
     /**
      * Update player time based on request data
      */
-    public function updatePlayerTime(Request $request): string
+                        public function updatePlayerTime(Request $request): string
     {
         $parsedData = $this->parseRequestData($request->pk);
         $autoUpdateEnabled = $this->isAutoUpdateEnabled();
@@ -71,7 +71,7 @@ class ResultService
     /**
      * Handle pigeon time update with auto-update logic
      */
-    private function handlePigeonTimeUpdate(array $requestData, array $parsedData, bool $autoUpdateEnabled): string
+        private function handlePigeonTimeUpdate(array $requestData, array $parsedData, bool $autoUpdateEnabled): string
     {
         if ($autoUpdateEnabled) {
             $this->updatePlayerTournamentPigeonTimes($requestData, $parsedData);
@@ -79,13 +79,13 @@ class ResultService
             $this->updatePigeonTime($requestData, $parsedData);
         }
 
-        return $requestData['value'];
+        return (string) $requestData['value'];
     }
 
     /**
      * Handle start time update with auto-update logic
      */
-    private function handleStartTimeUpdate(array $requestData, array $parsedData, bool $autoUpdateEnabled): string
+        private function handleStartTimeUpdate(array $requestData, array $parsedData, bool $autoUpdateEnabled): string
     {
         if ($autoUpdateEnabled) {
             $this->updateAllTournamentStartTimes($requestData, $parsedData);
@@ -93,74 +93,73 @@ class ResultService
             $this->updateStartTime($requestData, $parsedData);
         }
 
-        return $requestData['value'];
+        return (string) $requestData['value'];
     }
 
     /**
- * Update pigeon times across all tournaments when auto-update is enabled
- */
-private function updatePlayerTournamentPigeonTimes(array $requestData, array $parsedData): void
-{
-    [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
-    $currentTournament = Tournament::find($tournamentId);
-    
-    if (!$currentTournament || !$currentTournament->allow_auto_update) {
-         $this->updatePigeonTime($requestData, $parsedData);
-         return;
+     * Update pigeon times across all tournaments when auto-update is enabled
+     */
+    private function updatePlayerTournamentPigeonTimes(array $requestData, array $parsedData): void
+    {
+        [$tournamentId, $date, $playerId, $pigeonNumber] = $parsedData;
+        $currentTournament = Tournament::find($tournamentId);
+        
+        if (!$currentTournament || !$currentTournament->allow_auto_update) {
+             $this->updatePigeonTime($requestData, $parsedData);
+             return;
+        }
+
+        $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
+            ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
+            ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
+            ->where('player_tournament.player_id', $playerId)
+            ->where('tournament_flying_days.date', $date)
+            ->where('tournaments.allow_auto_update', 1)
+            ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
+            ->get();
+
+        foreach ($tournaments as $tournament) {
+            $modifiedData = $parsedData;
+            $modifiedData[0] = $tournament->tournament_id;
+            $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for pigeons
+            $this->updatePigeonTime($requestData, $modifiedData);
+        }
     }
 
-    $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
-        ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
-        ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
-        ->where('player_tournament.player_id', $playerId)
-        ->where('tournament_flying_days.date', $date)
-        ->where('tournaments.allow_auto_update', 1)
-        ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
-        ->get();
+    /**
+     * Update start times across all tournaments when auto-update is enabled
+     */
+    private function updateAllTournamentStartTimes(array $requestData, array $parsedData): void
+    {
+        [$tournamentId, $date, $playerId] = $parsedData;
+        $currentTournament = Tournament::find($tournamentId);
 
-    foreach ($tournaments as $tournament) {
-        $modifiedData = $parsedData;
-        $modifiedData[0] = $tournament->tournament_id;
-        $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for pigeons
-        $this->updatePigeonTime($requestData, $modifiedData);
+        if (!$currentTournament || !$currentTournament->allow_auto_update) {
+            $this->updateStartTime($requestData, $parsedData);
+            return;
+        }
+
+        $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
+            ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
+            ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
+            ->where('player_tournament.player_id', $playerId)
+            ->where('tournament_flying_days.date', $date)
+            ->where('tournaments.allow_auto_update', 1)
+            ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
+            ->get();
+
+        foreach ($tournaments as $tournament) {
+            $modifiedData = $parsedData;
+            $modifiedData[0] = $tournament->tournament_id;
+            $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for start times
+            $this->updateStartTime($requestData, $modifiedData);
+        }
     }
-}
-
-/**
- * Update start times across all tournaments when auto-update is enabled
- */
-private function updateAllTournamentStartTimes(array $requestData, array $parsedData): void
-{
-    [$tournamentId, $date, $playerId] = $parsedData;
-    $currentTournament = Tournament::find($tournamentId);
-
-    if (!$currentTournament || !$currentTournament->allow_auto_update) {
-        $this->updateStartTime($requestData, $parsedData);
-        return;
-    }
-
-    $tournaments = \Illuminate\Support\Facades\DB::table('player_tournament')
-        ->join('tournaments', 'player_tournament.tournament_id', '=', 'tournaments.id')
-        ->join('tournament_flying_days', 'tournaments.id', '=', 'tournament_flying_days.tournament_id')
-        ->where('player_tournament.player_id', $playerId)
-        ->where('tournament_flying_days.date', $date)
-        ->where('tournaments.allow_auto_update', 1)
-        ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
-        ->get();
-
-    foreach ($tournaments as $tournament) {
-        $modifiedData = $parsedData;
-        $modifiedData[0] = $tournament->tournament_id;
-        $modifiedData[count($parsedData)-1] = $tournament->club_id; // Always last element in parsedData for start times
-        $this->updateStartTime($requestData, $modifiedData);
-    }
-}
-
 
     /**
      * Update pigeon time for a specific result
      */
-    private function updatePigeonTime(array $requestData, array $parsedData): string
+        private function updatePigeonTime(array $requestData, array $parsedData): string
     {
         [$tournamentId, $date, $playerId, $pigeonNumber,$club_id] = $parsedData;
         $formattedTime = $this->formatTimeValue($requestData['value']);
@@ -175,7 +174,7 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
 
         $this->updatePlayerTournamentTotal($tournamentId, $date, $playerId);
         $this->deferCacheFlush($tournamentId, $date, $club_id);
-        return $requestData['value'];
+        return (string) $requestData['value'];
     }
 
     /**
@@ -202,8 +201,11 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
     /**
      * Format time value by removing colons and padding with zeros
      */
-    private function formatTimeValue(string $timeValue): string
+        private function formatTimeValue(?string $timeValue): string
     {
+        if (empty($timeValue)) {
+            return '000000';
+        }
         return str_pad(str_replace(':', '', $timeValue), self::TIME_PADDING_LENGTH, '0');
     }
 
@@ -280,12 +282,34 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
     }
 
     /**
+     * Safely convert numeric time strings (like SQLite's 60000) back to standard HH:MM:SS format.
+     */
+    public static function ensureColons(?string $time): ?string
+    {
+        if (empty($time)) {
+            return $time;
+        }
+
+        if (str_contains($time, ':')) {
+            return $time;
+        }
+
+        $timeClean = str_pad($time, 6, '0', STR_PAD_LEFT);
+        if (strlen($timeClean) === 6) {
+            return substr($timeClean, 0, 2) . ':' . substr($timeClean, 2, 2) . ':' . substr($timeClean, 4, 2);
+        }
+
+        return $time;
+    }
+
+    /**
      * Calculate total time between start and pigeon time
      */
     private function calculateTotalTime(?string $startTime, ?string $pigeonTime): int|string
     {
         if ($this->isValidTime($pigeonTime) && $startTime) {
-            
+            $startTime = self::ensureColons($startTime);
+            $pigeonTime = self::ensureColons($pigeonTime);
             return Carbon::parse($startTime)->diffInSeconds(Carbon::parse($pigeonTime));
         }
 
@@ -354,51 +378,51 @@ private function updateAllTournamentStartTimes(array $requestData, array $parsed
     }
 
     /**
- * Process results when supporter logic applies
- */
-private function processSupporterResults(Tournament $tournament, int $landedCount, \Illuminate\Support\Collection $results, bool $persist = true): \Illuminate\Support\Collection
-{
-    // First, restore any previously dropped records to their true value
-    if ($persist) {
-        Result::whereIn('id', $results->pluck('id'))
-            ->whereColumn('pigeon_total', '!=', 'time_in_seconds')
-            ->update([
-                'pigeon_total' => \Illuminate\Support\Facades\DB::raw('time_in_seconds')
-            ]);
-        foreach ($results as $result) {
-            $result->pigeon_total = $result->time_in_seconds;
-        }
-    } else {
-        foreach ($results as $result) {
-            $result->pigeon_total = $result->time_in_seconds;
-        }
-    }
-
-    $sortedResults = $results->sortBy('time_in_seconds')->values();
-    $targetCount = $tournament->pigeons - $tournament->supporter;
-    $excessCount = $landedCount - $targetCount;
-
-    $resultsToZero = $sortedResults->take($excessCount);
-
-    if ($resultsToZero->isNotEmpty()) {
+     * Process results when supporter logic applies
+     */
+    private function processSupporterResults(Tournament $tournament, int $landedCount, \Illuminate\Support\Collection $results, bool $persist = true): \Illuminate\Support\Collection
+    {
+        // First, restore any previously dropped records to their true value
         if ($persist) {
-            Result::whereIn('id', $resultsToZero->pluck('id'))->update(['pigeon_total' => 0]);
+            Result::whereIn('id', $results->pluck('id'))
+                ->whereColumn('pigeon_total', '!=', 'time_in_seconds')
+                ->update([
+                    'pigeon_total' => \Illuminate\Support\Facades\DB::raw('time_in_seconds')
+                ]);
+            foreach ($results as $result) {
+                $result->pigeon_total = $result->time_in_seconds;
+            }
         } else {
-            foreach ($resultsToZero as $result) {
-                $result->pigeon_total = 0;
+            foreach ($results as $result) {
+                $result->pigeon_total = $result->time_in_seconds;
             }
         }
-        
-        // Also update memory ref
-        foreach ($results as $result) {
-            if ($resultsToZero->contains('id', $result->id)) {
-                $result->pigeon_total = 0;
-            }
-        }
-    }
 
-    return $results;
-}
+        $sortedResults = $results->sortBy('time_in_seconds')->values();
+        $targetCount = $tournament->pigeons - $tournament->supporter;
+        $excessCount = $landedCount - $targetCount;
+
+        $resultsToZero = $sortedResults->take($excessCount);
+
+        if ($resultsToZero->isNotEmpty()) {
+            if ($persist) {
+                Result::whereIn('id', $resultsToZero->pluck('id'))->update(['pigeon_total' => 0]);
+            } else {
+                foreach ($resultsToZero as $result) {
+                    $result->pigeon_total = 0;
+                }
+            }
+            
+            // Also update memory ref
+            foreach ($results as $result) {
+                if ($resultsToZero->contains('id', $result->id)) {
+                    $result->pigeon_total = 0;
+                }
+            }
+        }
+
+        return $results;
+    }
 
     /**
      * Update or insert player tournament total record
@@ -601,11 +625,126 @@ private function processSupporterResults(Tournament $tournament, int $landedCoun
         $this->deferCacheFlush($tournamentId, $date, $clubId);
         $this->executePendingCacheFlushes();
     }
-    public function canEditThisResult($request)
+
+    /**
+     * Recalculate supporter logic and totals for the entire tournament (all players and all dates).
+     * This is called when a tournament's settings (e.g. supporter count) are updated.
+     */
+    public function recalculateTournamentSupporterLogic(Tournament $tournament): void
     {
-        $data = explode('_', $request->pk);
-        $tournament_id =  $data[0];
-        $date = $data[1]; // pk is [tournament_id, date, player_id, (pigeon_number|club_id)]
+        DB::transaction(function () use ($tournament) {
+            // 1. Fetch all results for this tournament
+            // Since we need to recalculate all players and dates, we group them by player_id and date.
+            $allResults = Result::where('tournament_id', $tournament->id)
+                ->get()
+                ->groupBy(function ($result) {
+                    return $result->player_id . '_' . $result->date;
+                });
+
+            $upsertResultsData = [];
+            $upsertTotalsData = [];
+
+            foreach ($allResults as $key => $groupResults) {
+                [$playerId, $date] = explode('_', $key);
+
+                // Find the start time (normally associated with pigeon_number = 1, but could be on any)
+                $firstWithStart = $groupResults->first(fn($r) => $r->start_time !== null);
+                $startTime = $firstWithStart ? $firstWithStart->start_time : null;
+
+                // First pass: restore times to true time_in_seconds and update base values
+                foreach ($groupResults as $result) {
+                    $newTotalTime = $this->calculateTotalTime($startTime, $result->pigeon_time);
+                    
+                    $result->start_time = $startTime;
+                    $result->time_in_seconds = $newTotalTime;
+                    // Restoring true base values
+                    $result->pigeon_total = $newTotalTime;
+                }
+
+                // Filter valid results (non-empty time results)
+                $validResults = $this->filterValidResults($groupResults);
+                $landedCount = $validResults->count();
+
+                // Re-apply supporter logic in-memory (persist = false so we don't query inside loop)
+                $processedResults = $this->applySupporterLogic($tournament, $landedCount, $validResults, false);
+
+                // Double stamp logic
+                $doubleStampResults = $validResults->filter(fn($r) => $r->is_double_stamp == 1 || $r->is_double_stamp === true);
+                $doubleStampLanded = $doubleStampResults->count();
+                $doubleStampTotal = $doubleStampResults->sum('pigeon_total');
+
+                // Rebuild upsert payload for results
+                foreach ($groupResults as $result) {
+                    $upsertResultsData[] = [
+                        'id' => $result->id,
+                        'player_id' => $result->player_id,
+                        'tournament_id' => $result->tournament_id,
+                        'date' => $result->date,
+                        'pigeon_number' => $result->pigeon_number,
+                        'start_time' => $result->start_time,
+                        'pigeon_time' => $result->pigeon_time,
+                        'pigeon_total' => $result->pigeon_total,
+                        'time_in_seconds' => $result->time_in_seconds,
+                        'is_double_stamp' => $result->is_double_stamp ? 1 : 0
+                    ];
+                }
+
+                // Add to totals payload
+                $upsertTotalsData[] = [
+                    'tournament_id' => $tournament->id,
+                    'date' => $date,
+                    'player_id' => $playerId,
+                    'landed' => $landedCount,
+                    'total' => $processedResults->sum('pigeon_total'),
+                    'double_stamp_landed' => $doubleStampLanded,
+                    'double_stamp_total' => $doubleStampTotal
+                ];
+            }
+
+            // 2. Perform bulk upsert of results
+            if (!empty($upsertResultsData)) {
+                foreach (array_chunk($upsertResultsData, 500) as $chunk) {
+                    Result::upsert(
+                        $chunk,
+                        ['player_id', 'tournament_id', 'date', 'pigeon_number'],
+                        ['start_time', 'pigeon_total', 'time_in_seconds', 'is_double_stamp']
+                    );
+                }
+            }
+
+            // 3. Perform bulk upsert of totals
+            if (!empty($upsertTotalsData)) {
+                foreach (array_chunk($upsertTotalsData, 500) as $chunk) {
+                    DB::table('player_tournament_total')->upsert(
+                        $chunk,
+                        ['player_id', 'tournament_id', 'date'],
+                        ['landed', 'total', 'double_stamp_landed', 'double_stamp_total']
+                    );
+                }
+            }
+        });
+
+        // 4. Batch flush all cache for the tournament dates
+        $flyingDays = DB::table('tournament_flying_days')
+            ->where('tournament_id', $tournament->id)
+            ->get();
+
+        foreach ($flyingDays as $day) {
+            $this->deferCacheFlush($tournament->id, $day->date, $tournament->club_id);
+        }
+        $this->executePendingCacheFlushes();
+    }
+
+        public function canEditThisResult($request)
+    {
+        if ($request->pk) {
+            $data = explode('_', $request->pk);
+            $tournament_id = $data[0];
+            $date = $data[1];
+        } else {
+            $tournament_id = $request->tournament_id;
+            $date = $request->value;
+        }
         return (new TournamentService)->canEditThisTournament($tournament_id, $date);
     }
 
