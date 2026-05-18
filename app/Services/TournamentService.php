@@ -409,10 +409,11 @@ class TournamentService
             ->toArray();
     }
 
-    public function getAllPlayers()
+        public function getAllPlayers()
     {
-        return Player::all();
+        return Player::where('status', true)->get();
     }
+
     public function getAllClubs()
     {
         return Club::all();

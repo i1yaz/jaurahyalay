@@ -64,10 +64,15 @@ class TournamentController extends Controller
         return view('admin.tournament.show', compact('tournament', 'days'));
     }
 
-    public function edit(Tournament $tournament)
+        public function edit(Tournament $tournament)
     {
-        $tournament = Tournament::with('flyingDays')->where('id', $tournament->id)->first();
-        $players = (new TournamentService())->getAllPlayers();
+        $tournament = Tournament::with('flyingDays', 'players')->where('id', $tournament->id)->first();
+        $allPlayers = (new TournamentService())->getAllPlayers();
+        
+        // Merge existing tournament players if they are not in the filtered list
+        $tournamentPlayers = $tournament->players;
+        $players = $allPlayers->merge($tournamentPlayers)->unique('id')->sortBy('id');
+
         $clubs = (new TournamentService())->getAllClubs();
         $days = $tournament->flyingDays;
         $prizes = $tournament->tournamentPrize;
@@ -75,6 +80,7 @@ class TournamentController extends Controller
         $tournamentAdmins = (new TournamentService())->getTournamentAdmins($tournament);
         return view('admin.tournament.edit', compact('tournament', 'days', 'players', 'clubs', 'prizes','admins','tournamentAdmins'));
     }
+
 
     public function update(validateTournament $request, Tournament $tournament)
     {

@@ -10,7 +10,7 @@ class Player extends BaseModel
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'phone', 'city', 'province', 'club_id',
+        'name', 'phone', 'city', 'province', 'club_id', 'status',
     ];
 
     public function tournaments()

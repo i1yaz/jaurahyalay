@@ -72,21 +72,22 @@ class PlayerController extends Controller
         return redirect('admin/player')->with('success', 'Player has been updated!');
     }
 
-    public function destroy(Player $player)
+        public function destroy(Player $player)
     { 
-        if ($player->delete()) {
-            $prefix = getStoragePrefix();
-            Storage::disk('r2')->delete("$prefix/website/profiles/" . $player->poster);
+        if ($player->update(['status' => false])) {
+            $this->websiteService->flushCache();
             return redirect()->back()->with('success', 'Player has been deleted!');
         } else {
             return redirect()->back()->withErrors('Something is wrong!');
         }
     }
-    public function getPlayers(Request $request)
+
+        public function getPlayers(Request $request)
     {
         $columns = ['id', 'id', 'name', 'club' ,'phone', 'city', 'province', 'id', 'id', 'id'];
         
-        $totalData = Player::count();
+        $query = Player::where('status', true);
+        $totalData = $query->count();
         $totalFiltered = $totalData;
 
         $limit = $request->input('length');
@@ -95,16 +96,14 @@ class PlayerController extends Controller
         $order = $columns[$orderIndex] ?? 'id';
         $dir = $request->input('order.0.dir');
 
-        $query = Player::query();
-
         if ($request->has('club_id') && $request->club_id !== 'all') {
             $query->where('players.club_id', $request->club_id);
         }
 
-        if ($request->has('status') && $request->status !== 'all') {
-            if ($request->status === 'played') {
+        if ($request->has('status_filter') && $request->status_filter !== 'all') {
+            if ($request->status_filter === 'played') {
                 $query->has('tournaments');
-            } elseif ($request->status === 'not_played') {
+            } elseif ($request->status_filter === 'not_played') {
                 $query->doesntHave('tournaments');
             }
         }
@@ -159,7 +158,8 @@ class PlayerController extends Controller
         ]);
     }
 
-    public function bulkDelete(Request $request)
+
+        public function bulkDelete(Request $request)
     {
         $ids = $request->ids;
         if (empty($ids)) {
@@ -169,20 +169,9 @@ class PlayerController extends Controller
         DB::beginTransaction();
         try {
             $players = Player::whereIn('id', $ids)->get();
-            $prefix = getStoragePrefix();
             
             foreach ($players as $player) {
-                // Delete image from storage
-                if ($player->poster) {
-                    Storage::disk('r2')->delete("$prefix/website/profiles/" . $player->poster);
-                }
-                
-                // Delete related data (pivot records and results)
-                $player->tournaments()->detach();
-                $player->playerTournamentResult()->delete();
-                
-                // Delete player
-                $player->delete();
+                $player->update(['status' => false]);
             }
 
             DB::commit();
@@ -193,6 +182,7 @@ class PlayerController extends Controller
             return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
+
 
     public function getPlayerTournaments(Player $player)
     {
