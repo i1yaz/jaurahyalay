@@ -1,47 +1,120 @@
-:root {
-    /* Primary Brand Colors */
-    --primary-blue: rgb(17, 138, 178);
-    --primary-blue-alt: rgba(7, 59, 76);
-    --primary-blue-solid: #007bff;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-    --bg-odd-table-color: #d1fff3;  /* Table odd color */
-    --bg-hover-green: #FFD166; /* Table Hover */
-    /* First/Last Pigeon Winner Colors */
-    --first-last-pigeons-bg: #EF476F;
-    --first-last-pigeons-text: #ffffff;
-    --first-last-pigeons-gradient: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
-    /* News Bar Gradient */
-    --news-bar-gradient: linear-gradient(135deg, #EF476F 0%, #ff7a97 50%, #ff476d 100%);
+:root {
+    /* Primary Brand Colors - Premium Pine Teal & Mint Green Gradient */
+    --primary-blue: #007F73;         /* Deep Pine Teal */
+    --primary-blue-alt: #4CCD99;     /* Vibrant Mint Green */
+    --primary-blue-solid: #007F73;
+
+    --bg-odd-table-color: #f8fafc;  /* Very soft off-white/light blue for table striping */
+    --bg-hover-green: rgba(76, 205, 153, 0.12); /* Soft mint highlight on hover */
+    
+    /* First/Last Pigeon Winner Colors - Luxury Golden Sunset Gradient */
+    --first-last-pigeons-bg: #FFC700;
+    --first-last-pigeons-text: #022d29; /* High-contrast deep pine for maximum legibility on gold background */
+    --first-last-pigeons-gradient: linear-gradient(135deg, #FFC700 0%, #FFF455 100%);
+    
+    /* News Bar Gradient - Sleek Teal to Mint gradient */
+    --news-bar-gradient: linear-gradient(135deg, #007F73 0%, #4CCD99 100%);
 
     /* Accent Colors */
-    
-    --accent-red: #ff0000;
-    --accent-teal: #20a286;
-    --accent-teal-light: #19b99a;
-    --accent-cyan: #5bc0de;
-    --accent-pink: #f25ebc;
+    --accent-red: #007F73;          /* Deep Teal for active states and highlights */
+    --accent-teal: #4CCD99;         /* Vibrant Mint Green */
+    --accent-teal-light: #007F73;   /* Deep Teal */
+    --accent-cyan: #4CCD99;         /* Mint Green */
+    --accent-pink: #FFC700;         /* Vibrant Gold */
 
-    /* Background Colors */
-    --bg-body: #ececec;
-    --bg-light-gray: #ecf0f5;
-    --bg-navy: #003F72;
-    --bg-card-blue: #0275d8;
+    /* Background Colors - Clean and Modern Light Slates with subtle green undertones */
+    --bg-body: #f2f7f5;             /* Extremely soft minty gray background */
+    --bg-light-gray: #f8fafc;       /* Off-white */
+    --bg-navy: #022D29;             /* Very deep Forest/Teal-Black for ultra-premium navbar contrast */
+    --bg-card-blue: #ffffff;        /* Pure white for card backgrounds */
 
-    /* Text Colors */
+    /* Text Colors - High Contrast Slate & Dark Slate */
     --text-white: #ffffff;
-    --text-dark: #555555;
-    --text-link-blue: #008cba;
+    --text-dark: #0f172a;           /* Deep dark slate for maximum readability and contrast */
+    --text-link-blue: #007F73;      /* Premium deep teal for highly visible links */
 
     /* Border Colors */
-    --border-light: #eeeeee;
-    --border-medium: #dddddd;
-
-
+    --border-light: #e2e8f0;        /* Soft slate borders */
+    --border-medium: #cbd5e1;       /* Medium slate borders */
 }
 
 body {
     background-color: var(--bg-body);
+    color: var(--text-dark);
+    font-family: 'Outfit', 'Inter', 'Noto Nastaliq Urdu', sans-serif;
     min-width: 1050px;
+}
+
+/* High Contrast Header elements */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-dark) !important;
+}
+
+/* Card Overrides to make them premium clean light-mode cards */
+.card {
+    background-color: var(--bg-card-blue) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
+    color: var(--text-dark) !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-alt)) !important;
+    color: var(--text-white) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* List Groups styling */
+.list-group-item {
+    background-color: var(--bg-card-blue) !important;
+    color: var(--text-dark) !important;
+    border: 1px solid var(--border-light) !important;
+}
+
+/* Table styling with high contrast */
+.table {
+    color: var(--text-dark) !important;
+}
+.table td, .table th {
+    border-top: 1px solid var(--border-light) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    vertical-align: middle;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: var(--bg-odd-table-color) !important;
+}
+.table tbody tr:hover td, .table tbody tr:hover th {
+    background-color: var(--bg-hover-green) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Input Fields & Textareas modern clean styling */
+input.form-control, select.form-control, textarea.form-control {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border-medium) !important;
+    color: var(--text-dark) !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+    background-color: #ffffff !important;
+    border-color: var(--primary-blue) !important;
+    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15) !important;
+    color: var(--text-dark) !important;
+}
+
+/* Callout Styling */
+.bs-callout {
+    background-color: #ffffff !important;
+    border: 1px solid var(--border-light) !important;
+    border-left: 5px solid var(--primary-blue) !important;
 }
 .alert-pak {
     background-color: var(--accent-teal);

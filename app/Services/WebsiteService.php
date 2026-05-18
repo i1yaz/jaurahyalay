@@ -27,12 +27,12 @@ class WebsiteService
         return Club::where('status', false)->get();
     }
 
-    public function getActiveTournamentForWebsite($nav=false): Collection
+    public function getActiveTournamentForWebsite($nav = false): Collection
     {
-        if($nav===true){
-            return Tournament::select(['id','name','club_id'])->where('start_date', '>=', now()->subDays(365)->toDateString())->where('public_hide', false)->orderBy('sort')->get();
+        if ($nav === true) {
+            return Tournament::select(['id', 'name', 'club_id'])->where('start_date', '>=', now()->subDays(365)->toDateString())->where('public_hide', false)->orderBy('sort')->get();
         }
-        return Tournament::select(['id','name','club_id'])->where('show', true)->where('public_hide', false)->orderBy('sort')->get();
+        return Tournament::select(['id', 'name', 'club_id'])->where('show', true)->where('public_hide', false)->orderBy('sort')->get();
     }
 
     public function getAllTournamentsOfThisClub($club)
@@ -170,19 +170,18 @@ class WebsiteService
             try {
                 $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
                     return $this->getFirstActiveTournamentForIndex();
-
-                }); 
+                });
 
                 $tags = [
-                    'club-'.$club_id,
+                    'club-' . $club_id,
                     'club-default',
-                    'tournament-'.$tournament_id,
-                    'tournament_'.$tournament_id.'-date-'.$date,
-                    'tournament_'.$tournament_id.'-date-total',
-                    'tournament_'.$tournament_id.'-date-double-stamp-total',
+                    'tournament-' . $tournament_id,
+                    'tournament_' . $tournament_id . '-date-' . $date,
+                    'tournament_' . $tournament_id . '-date-total',
+                    'tournament_' . $tournament_id . '-date-double-stamp-total',
                 ];
 
-                if($firstActiveTournament->id == $tournament_id){
+                if ($firstActiveTournament->id == $tournament_id) {
                     $tags[] = 'home';
                 }
 
@@ -209,15 +208,15 @@ class WebsiteService
         if (empty($flushParams)) {
             return;
         }
-        
+
         $allRoutes = [];
         $allTags = [];
         $firstActiveTournament = null;
-        
+
         try {
             $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
                 return $this->getFirstActiveTournamentForIndex();
-            }); 
+            });
         } catch (\Exception $e) {
             // Ignore error here, we'll try to flush everything if LSCache fails later
         }
@@ -226,11 +225,11 @@ class WebsiteService
             $tournament_id = $params['tournament_id'] ?? null;
             $date = $params['date'] ?? null;
             $club_id = $params['club_id'] ?? null;
-            
+
             if (!$tournament_id || !$date || !$club_id) {
                 continue;
             }
-            
+
             // Club index page
             $allRoutes[] = route('result.club', ['club' => $club_id]);
             $allRoutes[] = route('result.club', ['club' => 'default']);
@@ -251,12 +250,12 @@ class WebsiteService
             $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
             $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
 
-            $allTags[] = 'club-'.$club_id;
+            $allTags[] = 'club-' . $club_id;
             $allTags[] = 'club-default';
-            $allTags[] = 'tournament-'.$tournament_id;
-            $allTags[] = 'tournament-'.$tournament_id.'-date-'.$date;
-            $allTags[] = 'tournament-'.$tournament_id.'-date-total';
-            $allTags[] = 'tournament-'.$tournament_id.'-date-double-stamp-total';
+            $allTags[] = 'tournament-' . $tournament_id;
+            $allTags[] = 'tournament-' . $tournament_id . '-date-' . $date;
+            $allTags[] = 'tournament-' . $tournament_id . '-date-total';
+            $allTags[] = 'tournament-' . $tournament_id . '-date-double-stamp-total';
 
             if ($firstActiveTournament && $firstActiveTournament->id == $tournament_id) {
                 // Home page
@@ -264,14 +263,14 @@ class WebsiteService
                 $allRoutes[] = route('root');
             }
         }
-        
+
         $routes = array_unique($allRoutes);
         $tags = array_values(array_unique($allTags));
-        
+
         if (empty($routes) || empty($tags)) {
             return;
         }
-        
+
         try {
             LSCache::purgeTags($tags, true);
         } catch (\Exception $e) {
@@ -286,13 +285,12 @@ class WebsiteService
     {
 
         try {
-            return $tournament->flyingDays->filter(fn ($item) => $item->date < $resultDate)
+            return $tournament->flyingDays->filter(fn($item) => $item->date < $resultDate)
                 ->sortByDesc('date')
                 ->first();
         } catch (\Throwable $th) {
             dump($th->getMessage());
         }
-
     }
 
     public function getPreviousDayShortPigeons($tournament, $previousDay)
@@ -302,7 +300,7 @@ class WebsiteService
                 return null;
             }
 
-            return Cache::remember('shortPigeons-'.$tournament->id.'-'.$previousDay->date, now()->addMinutes(60), function () use ($tournament, $previousDay) {
+            return Cache::remember('shortPigeons-' . $tournament->id . '-' . $previousDay->date, now()->addMinutes(60), function () use ($tournament, $previousDay) {
                 return Result::where(function ($query) {
                     $query->whereNull('pigeon_time')
                         ->orWhere('pigeon_time', '00:00:00');
@@ -310,12 +308,10 @@ class WebsiteService
                     ->where('date', $previousDay->date)
                     ->where('tournament_id', $tournament->id)
                     ->get();
-
             });
         } catch (\Throwable $th) {
             dump($th->getMessage());
         }
-
     }
 
     /**
@@ -332,6 +328,5 @@ class WebsiteService
             return 0;
         }
         Redis::connection('central_keys')->sadd($redisKey, ...$urls);
-
     }
 }

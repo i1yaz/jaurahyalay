@@ -25,7 +25,7 @@ class TournamentService
 {
     private const BATCH_SIZE = 1000;
 
-        public function updateTournament(Request $request, Tournament $tournament): Tournament
+    public function updateTournament(Request $request, Tournament $tournament): Tournament
     {
         return DB::transaction(function () use ($request, $tournament) {
             try {
@@ -58,7 +58,7 @@ class TournamentService
 
                 // Update tournament-related data using the fresh model instance, passing the old start time
                 $this->updateTournamentPlayerData($freshTournament, $oldStartTime);
-                
+
                 return $freshTournament;
             } catch (\Exception $e) {
                 Log::error('Tournament update failed: ' . $e->getMessage(), [
@@ -454,7 +454,7 @@ class TournamentService
         if (is_array($request->tournament_admins)) {
             // Delete all current moderators ONCE before the loop
             DB::table('tournament_moderator')->where(['tournament_id' => $tournament->id])->delete();
-            
+
             foreach ($request->tournament_admins as $admin) {
                 DB::table('tournament_moderator')->insert([
                     'user_id' => $admin,
@@ -473,7 +473,7 @@ class TournamentService
             ->toArray();
     }
 
-        public function getAllPlayers()
+    public function getAllPlayers()
     {
         return Player::where('status', true)->get();
     }
@@ -525,7 +525,7 @@ class TournamentService
             'owner' => $request->owner,
             'phone' => $request->phone,
             'city' => $request->city,
-            'sort' => $request->sort??0,
+            'sort' => $request->sort ?? 0,
             'status' => $request->status == "true",
             'poster' => $request->poster,
         ]);
@@ -537,9 +537,9 @@ class TournamentService
     }
     public function updatePlayer(Request $request, Player $player): Player
     {
-        return $this->savePlayer($request,$player->id);
+        return $this->savePlayer($request, $player->id);
     }
-    private function savePlayer($request,int $id=0):Player
+    private function savePlayer($request, int $id = 0): Player
     {
         $player = Player::updateOrCreateInstance($id);
         $player->name = $request->name;
@@ -556,7 +556,7 @@ class TournamentService
         $club->owner = $request->owner;
         $club->phone = $request->phone;
         $club->city = $request->city;
-        $club->sort = $request->sort??0;
+        $club->sort = $request->sort ?? 0;
         $club->status = $request->status == "true";
         $club->poster = $request->poster;
         $club->update();
@@ -573,28 +573,27 @@ class TournamentService
                 if ($result) {
                     $slider->delete();
                 }
-            }else{
+            } else {
                 $slider->delete();
             }
         }
-        
+
         foreach ($request->file('sliders') as $sliderImage) {
             $filename = Str::random(40) . '.webp';
 
             $image = Image::make($sliderImage)
-                ->encode('webp')
-                ->resize(1280, 250);
+                ->encode('webp');
             Storage::disk('r2')->put(
-                "$prefix/website/sliders/{$filename}", 
+                "$prefix/website/sliders/{$filename}",
                 $image->stream()
             );
-            
+
             // Save to database
             $sliderInstance = new Slider();
             $sliderInstance->slider = $filename;
             $sliderInstance->save();
         }
-        
+
         return true;
     }
     public function storePlayerPicture($request, Player $player, $type = 'create')
@@ -651,7 +650,8 @@ class TournamentService
             if (DB::table('tournament_moderator')
                 ->where('user_id', $user->id)
                 ->where('tournament_id', $tournament_id)
-                ->exists()) {
+                ->exists()
+            ) {
                 return true;
             }
         }

@@ -122,9 +122,9 @@
         opacity: 0;
         transform: translateY(15px);
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        background-color: #1a1a2e !important;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        background-color: #ffffff !important;
+        border: 1px solid var(--border-medium);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         border-radius: 8px;
         margin-top: 5px;
         min-width: 250px;
@@ -141,7 +141,7 @@
     }
 
     .dropdown-item {
-        color: white !important;
+        color: var(--text-dark) !important;
         padding: 0.75rem 1.25rem;
         font-weight: 400;
         transition: all 0.2s ease;
@@ -149,13 +149,13 @@
 
     .dropdown-item:hover,
     .dropdown-item:focus {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
+        background-color: var(--bg-body) !important;
+        color: var(--primary-blue) !important;
         padding-left: 1.5rem; /* Subtle slide effect on hover */
     }
 
     .dropdown-item.active {
-        background-color: rgba(63, 0, 255, 0.5) !important;
+        background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-alt)) !important;
         color: white !important;
         font-weight: 600;
     }

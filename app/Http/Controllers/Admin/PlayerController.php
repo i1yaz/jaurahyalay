@@ -82,11 +82,11 @@ class PlayerController extends Controller
         }
     }
 
-        public function getPlayers(Request $request)
+    public function getPlayers(Request $request)
     {
         $columns = ['id', 'id', 'name', 'club' ,'phone', 'city', 'province', 'id', 'id', 'id'];
         
-        $query = Player::where('status', true);
+        $query = Player::where('players.status', true);
         $totalData = $query->count();
         $totalFiltered = $totalData;
 
