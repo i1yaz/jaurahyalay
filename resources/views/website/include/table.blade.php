@@ -22,12 +22,12 @@
                 </div>
                 @if ($resultDate !='total' && $resultDate !='double-stamp-total')
 
-                    <div class="row stats-grid-wrapper mb-4">
+                    <div class="row stats-grid-wrapper flex-nowrap mb-4">
                         <!-- Lofts Stat -->
                         <div class="col-3 mb-3">
                             <div class="card stats-card lofts-stats h-100">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
-                                    <span class="stats-label font-weight-bold">LOFTS</span>
+                                <div class="card-body d-flex align-items-center justify-content-center p-2 p-md-3 text-center flex-wrap">
+                                    <span class="stats-label font-weight-bold mr-1">LOFTS:</span>
                                     <span class="stats-value font-weight-bold">
                                         {{$tournament->players->count()}}
                                     </span>
@@ -38,8 +38,8 @@
                         <!-- Total Pigeons Stat -->
                         <div class="col-3 mb-3">
                             <div class="card stats-card total-pigeons-stats h-100">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
-                                    <span class="stats-label font-weight-bold">TOTAL PIGEONS</span>
+                                <div class="card-body d-flex align-items-center justify-content-center p-2 p-md-3 text-center flex-wrap">
+                                    <span class="stats-label font-weight-bold mr-1">TOTAL PIGEONS:</span>
                                     <span class="stats-value font-weight-bold">
                                         {{$tournament->players->count() * $tournament->pigeons}}
                                     </span>
@@ -50,8 +50,8 @@
                         <!-- Landed Pigeons Stat -->
                         <div class="col-3 mb-3">
                             <div class="card stats-card landed-pigeons-stats h-100">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
-                                    <span class="stats-label font-weight-bold">LANDED</span>
+                                <div class="card-body d-flex align-items-center justify-content-center p-2 p-md-3 text-center flex-wrap">
+                                    <span class="stats-label font-weight-bold mr-1">LANDED:</span>
                                     <span class="stats-value font-weight-bold">
                                         {{$tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count()}}
                                     </span>
@@ -62,8 +62,8 @@
                         <!-- Remaining Pigeons Stat -->
                         <div class="col-3 mb-3">
                             <div class="card stats-card remaining-pigeons-stats h-100">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
-                                    <span class="stats-label font-weight-bold">REMAINING</span>
+                                <div class="card-body d-flex align-items-center justify-content-center p-2 p-md-3 text-center flex-wrap">
+                                    <span class="stats-label font-weight-bold mr-1">REMAINING:</span>
                                     <span class="stats-value font-weight-bold">
                                         {{($tournament->players->count() * $tournament->pigeons) - ($tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count())}}
                                     </span>

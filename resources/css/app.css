@@ -560,6 +560,7 @@ h3{
 /* Stats Grid Styles */
 .stats-grid-wrapper {
     margin-top: 15px;
+    flex-wrap: nowrap !important;
 }
 
 .stats-card {
@@ -622,17 +623,22 @@ h3{
 }
 
 .stats-card .stats-label {
-    font-size: 0.72rem;
+    font-size: 0.9rem;
     font-weight: 800;
-    letter-spacing: 0.8px;
-    margin-bottom: 4px;
-    display: block;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    vertical-align: middle;
+    word-break: break-word;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .stats-card .stats-value {
-    line-height: 1.2;
-    margin-top: 2px;
-    font-size: 1.5rem;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
 }
 
 @media (max-width: 767px) {
@@ -648,12 +654,12 @@ h3{
         padding: 8px 4px !important;
     }
     .stats-card .stats-label {
-        font-size: 0.52rem !important;
+        font-size: 0.62rem !important;
         letter-spacing: 0.1px !important;
-        margin-bottom: 2px !important;
+        margin-bottom: 0 !important;
     }
     .stats-card .stats-value {
-        font-size: 1.15rem !important;
+        font-size: 0.62rem !important;
     }
 }
 
