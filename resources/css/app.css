@@ -460,13 +460,6 @@ h3{
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
-.pigeon-winner-card.first-winner-card {
-    border-left: 5px solid #EA5252 !important; /* Premium Coral Red instead of gradient */
-}
-
-.pigeon-winner-card.last-winner-card {
-    border-left: 5px solid #5B7E3C !important; /* Premium Olive Green instead of gradient */
-}
 
 .pigeon-winner-card .winner-icon-container {
     width: 46px;
