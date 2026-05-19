@@ -64,13 +64,114 @@ function getFirstWinnerLastWinners($tournament, $resultDate, $players)
         $lastWinnerPigeonTime = $lastWinner->pigeon_time ?? '';
 
 
-        return "<div class='alert alert-info pigeon-winner-alert' role='alert'><strong>First Winner : <strong>{$firstWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$firstWinnerPigeonTime}</span><strong></strong></strong></div>
-                <div class='alert alert-info pigeon-winner-alert' role='alert'><strong>Last Winner : <strong>{$lastWinnerPlayerName}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Time <span href='#' class='custom_span'>{$lastWinnerPigeonTime}</span><strong></strong></strong></div>
-        ";
+        $firstProfilePic = '';
+        if ($firstWinnerPlayer) {
+            $picSrc = $firstWinnerPlayer->poster 
+                ? asset('website/profiles/' . $firstWinnerPlayer->poster) 
+                : (config('settings.profile_pic_type') === 'circle' 
+                    ? asset('website/profiles/profile.png') 
+                    : asset('website/profiles/profile-square.png'));
+            
+            $imgClass = config('settings.profile_pic_type') === 'circle' ? 'rounded-circle' : 'rounded';
+            $firstProfilePic = "<img src='{$picSrc}' alt='{$firstWinnerPlayerName}' class='{$imgClass} mr-3' style='width: 50px; height: 50px; object-fit: cover;'>";
+        }
+
+        $lastProfilePic = '';
+        if ($lastWinnerPlayer) {
+            $picSrc = $lastWinnerPlayer->poster 
+                ? asset('website/profiles/' . $lastWinnerPlayer->poster) 
+                : (config('settings.profile_pic_type') === 'circle' 
+                    ? asset('website/profiles/profile.png') 
+                    : asset('website/profiles/profile-square.png'));
+            
+            $imgClass = config('settings.profile_pic_type') === 'circle' ? 'rounded-circle' : 'rounded';
+            $lastProfilePic = "<img src='{$picSrc}' alt='{$lastWinnerPlayerName}' class='{$imgClass} mr-3' style='width: 50px; height: 50px; object-fit: cover;'>";
+        }
+
+        $cards = [];
+
+        if ($firstWinnerPlayerName) {
+            $cards[] = "<div class='col-6 mb-3'>
+                <div class='card pigeon-winner-card first-winner-card h-100'>
+                    <div class='card-header text-white font-weight-bold d-flex align-items-center' style='background-color: #EA5252; border: none; padding: 10px 15px;'>
+                        <i class='fas fa-trophy mr-2 winner-icon'></i>First Winner
+                    </div>
+                    <div class='card-body d-flex align-items-center justify-content-between p-3'>
+                        <div class='d-flex align-items-center'>
+                            {$firstProfilePic}
+                            <div>
+                                <span class='winner-name font-weight-bold' style='font-size: 1.15rem; color: var(--text-dark);'>{$firstWinnerPlayerName}</span>
+                            </div>
+                        </div>
+                        <div class='text-right'>
+                            <span class='text-muted small d-block font-weight-bold'>TIME</span>
+                            <span class='badge custom-time-badge'>{$firstWinnerPigeonTime}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>";
+        }
+
+        if ($lastWinnerPlayerName) {
+            $cards[] = "<div class='col-6 mb-3'>
+                <div class='card pigeon-winner-card last-winner-card h-100'>
+                    <div class='card-header text-white font-weight-bold d-flex align-items-center' style='background-color: #5B7E3C; border: none; padding: 10px 15px;'>
+                        <i class='fas fa-award mr-2 winner-icon'></i>Last Winner
+                    </div>
+                    <div class='card-body d-flex align-items-center justify-content-between p-3'>
+                        <div class='d-flex align-items-center'>
+                            {$lastProfilePic}
+                            <div>
+                                <span class='winner-name font-weight-bold' style='font-size: 1.15rem; color: var(--text-dark);'>{$lastWinnerPlayerName}</span>
+                            </div>
+                        </div>
+                        <div class='text-right'>
+                            <span class='text-muted small d-block font-weight-bold'>TIME</span>
+                            <span class='badge custom-time-badge'>{$lastWinnerPigeonTime}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>";
+        }
+
+        if (empty($cards)) {
+            return '';
+        }
+
+        // If only one card is active, let it span 12 columns
+        if (count($cards) === 1) {
+            $cards[0] = str_replace("col-6", "col-12", $cards[0]);
+        }
+
+        return "<div class='row winner-cards-wrapper'>" . implode('', $cards) . "</div>";
     } catch (\Throwable $th) {
         throw $th;
-        return "<div class='alert alert-info pigeon-winner-alert' role='alert'><strong>First Winner : <strong></strong></strong></div>
-                <div class='alert alert-info pigeon-winner-alert' role='alert'><strong>Last Winner : <strong></strong></strong></div>";
+        return "<div class='row winner-cards-wrapper'>
+                    <div class='col-6 mb-3'>
+                        <div class='card pigeon-winner-card first-winner-card h-100'>
+                            <div class='card-header text-white font-weight-bold d-flex align-items-center' style='background-color: #EA5252; border: none; padding: 10px 15px;'>
+                                <i class='fas fa-trophy mr-2 winner-icon'></i>First Winner
+                            </div>
+                            <div class='card-body d-flex align-items-center justify-content-between p-3'>
+                                <div class='d-flex align-items-center'>
+                                    <span class='winner-name d-block'></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-6 mb-3'>
+                        <div class='card pigeon-winner-card last-winner-card h-100'>
+                            <div class='card-header text-white font-weight-bold d-flex align-items-center' style='background-color: #5B7E3C; border: none; padding: 10px 15px;'>
+                                <i class='fas fa-award mr-2 winner-icon'></i>Last Winner
+                            </div>
+                            <div class='card-body d-flex align-items-center justify-content-between p-3'>
+                                <div class='d-flex align-items-center'>
+                                    <span class='winner-name d-block'></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>";
     }
 }
 

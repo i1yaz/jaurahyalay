@@ -24,17 +24,20 @@
     }
 
     @keyframes ticker-scroll {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
     }
 </style>
 
 <div class="container-fluid">
     @if (isset($activeNews) && $activeNews->isNotEmpty())
     <section class="content-header">
-      <div class="row news-ticker">
-          <div class="col-lg-12">
-              <div class="news-ticker-wrapper mt-2 pb-2" style="line-height: 1.8; padding-top: 8px;">
+      <div class="row news-ticker d-flex align-items-center flex-nowrap" style="margin-left: 0; margin-right: 0; padding: 0 15px;">
+          <div class="news-label-badge mr-3 d-flex align-items-center">
+              <i class="fas fa-bullhorn mr-2 animate-speaker"></i> NEWS
+          </div>
+          <div class="flex-grow-1 overflow-hidden">
+              <div class="news-ticker-wrapper" style="line-height: 1.8; padding: 4px 0;">
                   <div class="news-ticker-content">
                     @foreach ($activeNews as $news)
                         <div class="news-ticker-item">

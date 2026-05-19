@@ -1,42 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Primary Brand Colors - Premium Pine Teal & Mint Green Gradient */
-    --primary-blue: #007F73;         /* Deep Pine Teal */
-    --primary-blue-alt: #4CCD99;     /* Vibrant Mint Green */
-    --primary-blue-solid: #007F73;
+    /* Primary Brand Colors - Rich Olive Green Gradient */
+    --primary-blue: #5B7E3C;         /* Deep Olive Green */
+    --primary-blue-alt: #78a353;     /* Lighter Vibrant Leafy Green */
+    --primary-blue-solid: #3A5325;   /* Solid Forest Green */
 
-    --bg-odd-table-color: #f8fafc;  /* Very soft off-white/light blue for table striping */
-    --bg-hover-green: rgba(76, 205, 153, 0.12); /* Soft mint highlight on hover */
+    --bg-odd-table-color: #f7f9f5;  /* Very soft sage-white for table striping */
+    --bg-hover-green: rgba(255, 214, 90, 0.15); /* Soft pastel gold highlight on hover */
     
-    /* First/Last Pigeon Winner Colors - Luxury Golden Sunset Gradient */
-    --first-last-pigeons-bg: #FFC700;
-    --first-last-pigeons-text: #022d29; /* High-contrast deep pine for maximum legibility on gold background */
-    --first-last-pigeons-gradient: linear-gradient(135deg, #FFC700 0%, #FFF455 100%);
+    /* First/Last Pigeon Winner Colors - Vivid Coral Red & Honey Orange Gradient */
+    --first-last-pigeons-bg: #EA5252;
+    --first-last-pigeons-text: #ffffff; /* Crisp white text contrast */
+    --first-last-pigeons-gradient: linear-gradient(135deg, #EA5252 0%, #FF9D23 100%);
     
-    /* News Bar Gradient - Sleek Teal to Mint gradient */
-    --news-bar-gradient: linear-gradient(135deg, #007F73 0%, #4CCD99 100%);
+    /* News Bar Gradient - Elegant Olive to Honey Orange gradient */
+    --news-bar-gradient: linear-gradient(135deg, #5B7E3C 0%, #FF9D23 100%);
 
     /* Accent Colors */
-    --accent-red: #007F73;          /* Deep Teal for active states and highlights */
-    --accent-teal: #4CCD99;         /* Vibrant Mint Green */
-    --accent-teal-light: #007F73;   /* Deep Teal */
-    --accent-cyan: #4CCD99;         /* Mint Green */
-    --accent-pink: #FFC700;         /* Vibrant Gold */
+    --accent-red: #EA5252;          /* Coral Red for active states and highlights */
+    --accent-teal: #FFD65A;         /* Pastel Gold */
+    --accent-teal-light: #FF9D23;   /* Honey Orange */
+    --accent-cyan: #5B7E3C;         /* Olive Green */
+    --accent-pink: #EA5252;         /* Coral Red */
 
-    /* Background Colors - Clean and Modern Light Slates with subtle green undertones */
-    --bg-body: #f2f7f5;             /* Extremely soft minty gray background */
-    --bg-light-gray: #f8fafc;       /* Off-white */
-    --bg-navy: #022D29;             /* Very deep Forest/Teal-Black for ultra-premium navbar contrast */
+    /* Background Colors - Clean and Modern Light Slates with subtle organic green undertones */
+    --bg-body: #f7f9f5;             /* Extremely soft cream/sage background */
+    --bg-light-gray: #fcfdfc;       /* Sage off-white */
+    --bg-navy: #1C2A12;             /* Very deep Forest Green-Black for high-contrast navbar elements */
     --bg-card-blue: #ffffff;        /* Pure white for card backgrounds */
 
     /* Text Colors - High Contrast Slate & Dark Slate */
     --text-white: #ffffff;
     --text-dark: #0f172a;           /* Deep dark slate for maximum readability and contrast */
-    --text-link-blue: #007F73;      /* Premium deep teal for highly visible links */
+    --text-link-blue: #5B7E3C;      /* Premium olive green for highly visible links */
 
     /* Border Colors */
-    --border-light: #e2e8f0;        /* Soft slate borders */
+    --border-light: #e6ebe0;        /* Soft sage borders */
     --border-medium: #cbd5e1;       /* Medium slate borders */
 }
 
@@ -69,6 +69,14 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    color: var(--text-white) !important;
 }
 
 /* List Groups styling */
@@ -382,32 +390,176 @@ h3{
     border-color: var(--primary-blue);
 }
 
-.news-ticker,
-.pigeon-winner-alert {
-    background: var(--news-bar-gradient);
-    padding: 10px;
-    border-radius: 5px;
+.news-ticker {
+    background: var(--bg-navy) !important; /* Elegant dark forest-navy background */
+    border-left: 5px solid #FFD65A !important; /* Gold accent border */
+    padding: 10px 20px;
+    border-radius: 8px;
     color: var(--text-white);
-    margin-top: 10px;
+    margin-top: 15px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(239, 71, 111, 0.18);
+    box-shadow: 0 8px 25px rgba(28, 42, 18, 0.25) !important;
 }
 
-.news-ticker::before,
-.pigeon-winner-alert::before {
+.news-ticker::before {
     content: "";
     position: absolute;
     top: -50%;
     left: -30%;
     width: 30%;
     height: 220%;
-    background: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.1); /* Subtle premium reflection instead of harsh white */
     transform: rotate(25deg);
     filter: blur(12px);
     animation: shine 3.2s ease-in-out infinite;
 }
 
-.pigeon-winner-alert {
-    color: var(--text-white);
+.news-ticker .news-label-badge {
+    background-color: #FFD65A !important; /* High contrast gold background */
+    color: #1C2A12 !important; /* Dark text for readability */
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(255, 214, 90, 0.3) !important;
+}
+
+.news-ticker .news-label-badge .animate-speaker {
+    display: inline-block;
+    animation: pulse-speaker 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-speaker {
+    0% { transform: scale(1) rotate(0deg); }
+    30% { transform: scale(1.15) rotate(-10deg); }
+    45% { transform: scale(1.15) rotate(10deg); }
+    60% { transform: scale(1.15) rotate(-10deg); }
+    75% { transform: scale(1.15) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Premium Winner Cards (No Gradients) */
+.winner-cards-wrapper {
+    margin-top: 15px;
+}
+
+.pigeon-winner-card {
+    background-color: var(--bg-card-blue) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.pigeon-winner-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.pigeon-winner-card.first-winner-card {
+    border-left: 5px solid #EA5252 !important; /* Premium Coral Red instead of gradient */
+}
+
+.pigeon-winner-card.last-winner-card {
+    border-left: 5px solid #5B7E3C !important; /* Premium Olive Green instead of gradient */
+}
+
+.pigeon-winner-card .winner-icon-container {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.pigeon-winner-card .winner-icon-container i {
+    animation: pulse-icon 2s infinite ease-in-out;
+}
+
+.pigeon-winner-card.first-winner-card .winner-icon-container {
+    background-color: rgba(234, 82, 82, 0.1);
+    color: #EA5252;
+}
+
+.pigeon-winner-card.last-winner-card .winner-icon-container {
+    background-color: rgba(91, 126, 60, 0.1);
+    color: #5B7E3C;
+}
+
+.pigeon-winner-card .winner-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #888;
+}
+
+.pigeon-winner-card .winner-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.pigeon-winner-card .custom-time-badge {
+    background: #f8f9fa;
+    color: #212529;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: 1px solid #e9ecef;
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+@keyframes pulse-icon {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 767px) {
+    .pigeon-winner-card .card-body {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 8px 10px !important;
+    }
+    .pigeon-winner-card .card-body .d-flex {
+        flex-direction: row !important;
+        align-items: center !important;
+        margin-bottom: 0 !important;
+        width: auto !important;
+    }
+    .pigeon-winner-card .card-body .d-flex img {
+        width: 32px !important;
+        height: 32px !important;
+        margin-right: 6px !important;
+        margin-bottom: 0 !important;
+    }
+    .pigeon-winner-card .winner-name {
+        font-size: 0.8rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 75px;
+        display: block;
+    }
+    .pigeon-winner-card .text-right {
+        text-align: right !important;
+        width: auto !important;
+    }
+    .pigeon-winner-card .text-right .text-muted {
+        display: none !important; /* Hide "TIME" label to save space on mobile */
+    }
+    .pigeon-winner-card .custom-time-badge {
+        font-size: 0.75rem !important;
+        padding: 3px 6px !important;
+        margin-top: 0 !important;
+    }
 }
