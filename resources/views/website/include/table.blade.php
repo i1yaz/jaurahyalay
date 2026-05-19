@@ -22,16 +22,55 @@
                 </div>
                 @if ($resultDate !='total' && $resultDate !='double-stamp-total')
 
-                    <div class="bs-callout bs-callout-info">
-                        <p>
-                            Lofts:{{$tournament->players->count()}},
-                            Total pigeons:{{$tournament->players->count() * $tournament->pigeons}},
-                            Pigeons
-                            landed:@php echo $tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count();  @endphp
-                            ,
-                            Pigeons
-                            remaining: @php echo ($tournament->players->count() * $tournament->pigeons) - ($tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count()) @endphp
-                        </p>
+                    <div class="row stats-grid-wrapper mb-4">
+                        <!-- Lofts Stat -->
+                        <div class="col-3 mb-3">
+                            <div class="card stats-card lofts-stats h-100">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
+                                    <span class="stats-label font-weight-bold">LOFTS</span>
+                                    <span class="stats-value font-weight-bold">
+                                        {{$tournament->players->count()}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total Pigeons Stat -->
+                        <div class="col-3 mb-3">
+                            <div class="card stats-card total-pigeons-stats h-100">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
+                                    <span class="stats-label font-weight-bold">TOTAL PIGEONS</span>
+                                    <span class="stats-value font-weight-bold">
+                                        {{$tournament->players->count() * $tournament->pigeons}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Landed Pigeons Stat -->
+                        <div class="col-3 mb-3">
+                            <div class="card stats-card landed-pigeons-stats h-100">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
+                                    <span class="stats-label font-weight-bold">LANDED</span>
+                                    <span class="stats-value font-weight-bold">
+                                        {{$tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count()}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Remaining Pigeons Stat -->
+                        <div class="col-3 mb-3">
+                            <div class="card stats-card remaining-pigeons-stats h-100">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center p-2 p-md-3 text-center">
+                                    <span class="stats-label font-weight-bold">REMAINING</span>
+                                    <span class="stats-value font-weight-bold">
+                                        {{($tournament->players->count() * $tournament->pigeons) - ($tournament->tournamentResult->where('pigeon_time','!=',NULL)->where('pigeon_time','!=','00:00:00')->count())}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 {{--                        @foreach($playersIdWithHighestTime as $player)--}}
 {{--                            <p>--}}
 {{--                                فرسٹ ونر : {{$player->name}} ( {{$player->city}} ) {{$highestFirstPigeonTime}}--}}

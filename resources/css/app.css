@@ -563,3 +563,105 @@ h3{
         margin-top: 0 !important;
     }
 }
+
+/* Stats Grid Styles */
+.stats-grid-wrapper {
+    margin-top: 15px;
+}
+
+.stats-card {
+    background-color: var(--bg-card-blue) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Stats Card Colorful Themes */
+.stats-card.lofts-stats {
+    background-color: rgba(91, 126, 60, 0.08) !important;
+    border: 1px solid rgba(91, 126, 60, 0.18) !important;
+}
+.stats-card.lofts-stats .stats-label {
+    color: rgba(91, 126, 60, 0.8) !important;
+}
+.stats-card.lofts-stats .stats-value {
+    color: #5B7E3C !important;
+}
+
+.stats-card.total-pigeons-stats {
+    background-color: rgba(255, 157, 35, 0.08) !important;
+    border: 1px solid rgba(255, 157, 35, 0.2) !important;
+}
+.stats-card.total-pigeons-stats .stats-label {
+    color: #d6790b !important;
+}
+.stats-card.total-pigeons-stats .stats-value {
+    color: #FF9D23 !important;
+}
+
+.stats-card.landed-pigeons-stats {
+    background-color: rgba(91, 126, 60, 0.12) !important;
+    border: 1px solid rgba(91, 126, 60, 0.22) !important;
+}
+.stats-card.landed-pigeons-stats .stats-label {
+    color: rgba(91, 126, 60, 0.85) !important;
+}
+.stats-card.landed-pigeons-stats .stats-value {
+    color: #5B7E3C !important;
+}
+
+.stats-card.remaining-pigeons-stats {
+    background-color: rgba(234, 82, 82, 0.08) !important;
+    border: 1px solid rgba(234, 82, 82, 0.18) !important;
+}
+.stats-card.remaining-pigeons-stats .stats-label {
+    color: rgba(234, 82, 82, 0.8) !important;
+}
+.stats-card.remaining-pigeons-stats .stats-value {
+    color: #EA5252 !important;
+}
+
+.stats-card .stats-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.stats-card .stats-value {
+    line-height: 1.2;
+    margin-top: 2px;
+    font-size: 1.5rem;
+}
+
+@media (max-width: 767px) {
+    .stats-grid-wrapper {
+        margin-left: -4px !important;
+        margin-right: -4px !important;
+    }
+    .stats-grid-wrapper .col-3 {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+    .stats-card .card-body {
+        padding: 8px 4px !important;
+    }
+    .stats-card .stats-label {
+        font-size: 0.52rem !important;
+        letter-spacing: 0.1px !important;
+        margin-bottom: 2px !important;
+    }
+    .stats-card .stats-value {
+        font-size: 1.15rem !important;
+    }
+}
+
+
