@@ -222,76 +222,85 @@
         }
     }
 
+    /* SPECIFIC MOBILE & TABLET ENLARGEMENTS */
     @media (max-width: 991px) {
         .custom-navbar {
-            padding: 0.5rem 0.75rem;
-            border-radius: 12px;
+            padding: 0.55rem 1rem;
+            border-radius: 14px;
             margin: 1rem 0 0.75rem;
         }
         .navbar.bg-navbar .nav-link {
-            font-size: 0.85rem !important;
-            padding: 0.35rem 0.6rem !important;
+            font-size: 1.15rem !important; /* Make font sizes bigger specifically on mobile as requested */
+            padding: 0.45rem 0.85rem !important;
+        }
+        .navbar-info {
+            padding-left: 1rem;
+            margin-left: auto !important; /* Beautiful flex gap between links and online badges */
+            gap: 8px;
+        }
+        .navbar-info .info-widget {
+            padding: 0.35rem 0.8rem;
+            font-size: 0.95rem;
+        }
+        .status-dot {
+            margin-right: 6px;
+            width: 8px;
+            height: 8px;
+        }
+        .nav-items .dropdown-menu {
+            min-width: 240px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .custom-navbar {
+            padding: 0.5rem 0.75rem;
+            margin: 0.75rem 0 0.5rem;
+        }
+        .navbar.bg-navbar .nav-link {
+            font-size: 1.15rem !important; /* Keep text highly visible and enlarged on mobile screens */
+            padding: 0.4rem 0.75rem !important;
         }
         .navbar-info {
             padding-left: 0.75rem;
-            margin-left: 0.5rem;
-            gap: 6px;
+            margin-left: auto !important; /* Keep the beautiful flex gap */
+            gap: 8px;
         }
         .navbar-info .info-widget {
-            padding: 0.3rem 0.65rem;
-            font-size: 0.8rem;
+            padding: 0.35rem 0.8rem;
+            font-size: 0.95rem;
         }
         .status-dot {
-            margin-right: 4px;
-            width: 7px;
-            height: 7px;
+            margin-right: 6px;
+            width: 8px;
+            height: 8px;
         }
         .nav-items .dropdown-menu {
             min-width: 220px;
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 576px) {
         .custom-navbar {
-            padding: 0.4rem 0.5rem;
-            margin: 0.75rem 0 0.5rem;
+            padding: 0.45rem 0.6rem;
         }
         .navbar.bg-navbar .nav-link {
-            font-size: 0.75rem !important;
-            padding: 0.3rem 0.45rem !important;
+            font-size: 1.1rem !important; /* Large readable size on very small displays */
+            padding: 0.35rem 0.65rem !important;
         }
         .navbar-info {
-            padding-left: 0.5rem;
-            margin-left: 0.35rem;
-            gap: 4px;
+            padding-left: 0.75rem;
+            margin-left: auto !important; /* Keep the beautiful flex gap */
+            gap: 6px;
         }
         .navbar-info .info-widget {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.72rem;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.9rem;
         }
         .status-dot {
-            margin-right: 3px;
-            width: 6px;
-            height: 6px;
-        }
-        .nav-items .dropdown-menu {
-            min-width: 200px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .navbar.bg-navbar .nav-link {
-            font-size: 0.7rem !important;
-            padding: 0.25rem 0.35rem !important;
-        }
-        .navbar-info {
-            padding-left: 0.4rem;
-            margin-left: 0.25rem;
-            gap: 3px;
-        }
-        .navbar-info .info-widget {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.68rem;
+            margin-right: 5px;
+            width: 7px;
+            height: 7px;
         }
     }
 </style>
