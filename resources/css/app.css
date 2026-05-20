@@ -261,7 +261,35 @@ span.location {
 
 }
 #footer {
-    margin-top: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+#footer nav {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06) !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+#footer img {
+    border-radius: 0 !important;
+}
+
+/* Carousel / Hero Slider rounding */
+#carouselControls {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+    margin-top: 12px;
+}
+#carouselControls .carousel-inner,
+#carouselControls .carousel-item {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+#carouselControls .carousel-item img {
+    border-radius: 0 !important;
 }
 .bs-callout {
     padding: 20px;
