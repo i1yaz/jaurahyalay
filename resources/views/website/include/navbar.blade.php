@@ -4,6 +4,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: nowrap !important; /* Keep strictly on a single horizontal row */
         padding: 0.65rem 1.5rem;
         margin: 1.25rem 0 1rem;
         border-radius: 16px;
@@ -17,7 +18,7 @@
         display: flex;
         flex-direction: row !important;
         align-items: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap !important; /* Keep links on a single horizontal line */
         gap: 6px;
         list-style-type: none;
         margin: 0;
@@ -42,6 +43,7 @@
         display: flex;
         align-items: center;
         position: relative;
+        white-space: nowrap; /* Prevent nav links from wrapping text */
     }
 
     /* Hover State: beautiful soft white translucent pill backdrop */
@@ -146,7 +148,7 @@
         align-items: center;
         gap: 12px;
         color: white;
-        flex-shrink: 0;
+        flex-shrink: 0; /* Keep status badges on the same line always */
         border-left: 1px solid rgba(255, 255, 255, 0.2);
         padding-left: 1.25rem;
         margin-left: 1rem;
@@ -165,6 +167,7 @@
         letter-spacing: 0.3px;
         box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         transition: all 0.2s ease;
+        white-space: nowrap;
     }
 
     .navbar-info .info-widget:hover {
@@ -202,64 +205,93 @@
         }
     }
 
-    /* Desktop & Tablet Responsive Overrides */
-    @media (max-width: 991px) {
-        .custom-navbar {
-            flex-direction: column;
-            align-items: stretch;
-            padding: 1rem;
-            border-radius: 14px;
-            gap: 12px;
-        }
-
-        .nav-items.navbar-nav {
-            justify-content: center;
-            gap: 4px;
-        }
-
+    /* Responsive scaling without column stacking to maintain single-line layout */
+    @media (max-width: 1200px) {
         .navbar.bg-navbar .nav-link {
             font-size: 0.95rem !important;
             padding: 0.4rem 0.8rem !important;
         }
-
         .navbar-info {
-            border-left: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-left: 0;
-            padding-top: 10px;
-            margin-left: 0;
-            justify-content: center;
+            padding-left: 1rem;
+            margin-left: 0.75rem;
+            gap: 8px;
         }
-
         .navbar-info .info-widget {
-            font-size: 0.85rem;
             padding: 0.35rem 0.8rem;
+            font-size: 0.85rem;
         }
     }
 
-    /* Small Mobile Screen Overrides */
-    @media (max-width: 576px) {
+    @media (max-width: 991px) {
         .custom-navbar {
-            padding: 0.75rem 0.5rem;
-            margin-top: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            margin: 1rem 0 0.75rem;
         }
-
-        .nav-items.navbar-nav {
-            gap: 2px;
-        }
-
         .navbar.bg-navbar .nav-link {
             font-size: 0.85rem !important;
             padding: 0.35rem 0.6rem !important;
         }
-
         .navbar-info {
+            padding-left: 0.75rem;
+            margin-left: 0.5rem;
             gap: 6px;
         }
-
         .navbar-info .info-widget {
-            font-size: 0.75rem;
-            padding: 0.3rem 0.6rem;
+            padding: 0.3rem 0.65rem;
+            font-size: 0.8rem;
+        }
+        .status-dot {
+            margin-right: 4px;
+            width: 7px;
+            height: 7px;
+        }
+        .nav-items .dropdown-menu {
+            min-width: 220px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .custom-navbar {
+            padding: 0.4rem 0.5rem;
+            margin: 0.75rem 0 0.5rem;
+        }
+        .navbar.bg-navbar .nav-link {
+            font-size: 0.75rem !important;
+            padding: 0.3rem 0.45rem !important;
+        }
+        .navbar-info {
+            padding-left: 0.5rem;
+            margin-left: 0.35rem;
+            gap: 4px;
+        }
+        .navbar-info .info-widget {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.72rem;
+        }
+        .status-dot {
+            margin-right: 3px;
+            width: 6px;
+            height: 6px;
+        }
+        .nav-items .dropdown-menu {
+            min-width: 200px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar.bg-navbar .nav-link {
+            font-size: 0.7rem !important;
+            padding: 0.25rem 0.35rem !important;
+        }
+        .navbar-info {
+            padding-left: 0.4rem;
+            margin-left: 0.25rem;
+            gap: 3px;
+        }
+        .navbar-info .info-widget {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.68rem;
         }
     }
 </style>
