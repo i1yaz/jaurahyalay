@@ -176,9 +176,9 @@ class WebsiteService
                     'club-' . $club_id,
                     'club-default',
                     'tournament-' . $tournament_id,
-                    'tournament_' . $tournament_id . '-date-' . $date,
-                    'tournament_' . $tournament_id . '-date-total',
-                    'tournament_' . $tournament_id . '-date-double-stamp-total',
+                    'tournament-' . $tournament_id . '-date-' . $date,
+                    'tournament-' . $tournament_id . '-date-total',
+                    'tournament-' . $tournament_id . '-date-double-stamp-total',
                 ];
 
                 if ($firstActiveTournament->id == $tournament_id) {
