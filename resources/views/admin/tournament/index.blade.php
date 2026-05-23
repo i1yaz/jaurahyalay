@@ -44,7 +44,7 @@
                   <th>Start Date #</th>
                   <th>Show in Results</th>
                   <th>Show on Front Page</th>
-                  {{-- <th>Hide From Public</th> --}}
+                  <th>Hide From Public</th>
                   <th>Sort</th>
                   <th>Activate</th>
                   <th>Edit</th>
@@ -94,7 +94,7 @@
                         {{ method_field('POST') }}
                         </form>
                         <a href="" onclick="
-                        if(confirm('Are you sure, You Want to activate this Tournament?'))
+                        if(confirm('Are you sure, You Want to {{ $tournament->status == 1 ? 'deactivate' : 'activate' }} this Tournament?'))
                             {
                             event.preventDefault();
                             document.getElementById('activate-form-{{ $tournament->id }}').submit();

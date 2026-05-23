@@ -78,7 +78,7 @@
                     @endphp
                     <td @if($res) class="blink" @endif  @if($isShort)  style="background: #fcf8e3!important;color: #fff" @endif>
                         @php
-                            if(isset($pigeonTime->pigeon_time)){ echo $pigeonTime->pigeon_time;}
+                            if(isset($pigeonTime->pigeon_time)  && $pigeonTime->pigeon_time != '00:00:00'){ echo $pigeonTime->pigeon_time;}
                         @endphp
                         @if($tournament->allow_double_stamp && isset($pigeonTime->is_double_stamp) && $pigeonTime->is_double_stamp)
                             <br><span class="badge badge-warning" style="background-color: #ffc107; color: #000; font-size: 0.7rem; padding: 0.2rem 0.4rem;">Double stamp</span>
