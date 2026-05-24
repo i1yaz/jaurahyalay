@@ -37,12 +37,12 @@
                 <div class="col-md-6">
                     <ul style="list-style-type: none;padding: 0;margin: 0; display: flex; gap: 5px;">
                         <li>
-                            <a target="_blank" href="https://wa.me/?text={{ url("result/default/{$tournament->id}") }}"
+                            <a target="_blank" href="https://wa.me/?text={{ route('result.tournament', ['tournament_id' => $tournament->id]) }}"
                                 class="btn btn-success" title="Share on WhatsApp"><span class="fab fa-whatsapp"></span></a>
                         </li>
                         <li>
                             <button type="button" class="btn btn-info copy-to-clipboard"
-                                data-url="{{ url("result/default/{$tournament->id}") }}" title="Copy Link">
+                                data-url="{{ route('result.tournament', ['tournament_id' => $tournament->id]) }}" title="Copy Link">
                                 <span class="fas fa-copy"></span>
                             </button>
                         </li>

@@ -47,13 +47,22 @@ Route::group(['middleware' => ['lscache:max-age=3600;stale=30;public']], functio
         ->name('result.club')
         ->middleware('dynamic_lstags:club-{club}');
 
-    Route::get('/result/{club_id}/{tournament_id}', [WebsiteController::class, 'loadTournament'])
+    Route::get('/result/tournament/{tournament_id}', [WebsiteController::class, 'loadTournament'])
         ->name('result.tournament')
         ->middleware('dynamic_lstags:tournament-{tournament_id}');
 
-    Route::get('/result/{club}/{tournament}/{date}', [WebsiteController::class, 'tournamentDateResult'])
+    Route::get('/result/tournament/{tournament}/{date}', [WebsiteController::class, 'tournamentDateResult'])
         ->name('result.tournament.date')
         ->middleware('dynamic_lstags:tournament-{tournament}-date-{date}');
+
+    // Permanent 301 redirects for old routes
+    Route::get('/result/{club_id}/{tournament_id}', function ($club_id, $tournament_id) {
+        return redirect()->route('result.tournament', ['tournament_id' => $tournament_id], 301);
+    });
+
+    Route::get('/result/{club}/{tournament}/{date}', function ($club, $tournament, $date) {
+        return redirect()->route('result.tournament.date', ['tournament' => $tournament, 'date' => $date], 301);
+    });
 });
 
 Auth::routes(['verify' => true]);

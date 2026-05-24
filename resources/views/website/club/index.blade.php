@@ -20,7 +20,7 @@
                         @endphp
                         <div class="row no-gutters mb-4 shadow-sm border rounded @if($loop->odd) bg-white @else bg-light @endif">
                             <div class="col-md-3 text-center d-flex align-items-center justify-content-center p-2">
-                                <a href="{{route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament->id])}}"
+                                <a href="{{route('result.tournament', ['tournament_id' => $tournament->id])}}"
                                     title="results of {{$tournament->name}}">
                                     <img @if($tournament->poster) src="{{asset('uploads/' . $tournament->poster)}}" @else
                                     src="{{asset('website/img/200x250.png')}}" @endif alt="{{$tournament->name}}"
@@ -29,7 +29,7 @@
                                 </a>
                             </div>
                             <div class="col-md-9 p-3">
-                                <a href="{{route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament->id])}}"
+                                <a href="{{route('result.tournament', ['tournament_id' => $tournament->id])}}"
                                     title="results of {{$tournament->name}}">
                                     <h4 class="text-primary font-weight-bold">{{$tournament->name}}</h4>
                                 </a>

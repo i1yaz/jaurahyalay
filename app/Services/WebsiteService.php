@@ -146,20 +146,16 @@ class WebsiteService
             $routes[] = route('result.club', ['club' => 'default']);
 
             // Tournament load pages
-            $routes[] = route('result.tournament', ['club_id' => $club_id, 'tournament_id' => $tournament_id]);
-            $routes[] = route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament_id]);
+            $routes[] = route('result.tournament', ['tournament_id' => $tournament_id]);
 
             // Tournament specific date pages
-            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => $date]);
-            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => $date]);
+            $routes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => $date]);
 
             // Tournament total pages
-            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
-            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
+            $routes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => 'total']);
 
             // Double stamp total pages
-            $routes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
-            $routes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+            $routes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => 'double-stamp-total']);
 
             $paths = array_map(function ($url) {
                 $path = str_replace(url('/'), '', $url);
@@ -235,20 +231,16 @@ class WebsiteService
             $allRoutes[] = route('result.club', ['club' => 'default']);
 
             // Tournament load pages
-            $allRoutes[] = route('result.tournament', ['club_id' => $club_id, 'tournament_id' => $tournament_id]);
-            $allRoutes[] = route('result.tournament', ['club_id' => 'default', 'tournament_id' => $tournament_id]);
+            $allRoutes[] = route('result.tournament', ['tournament_id' => $tournament_id]);
 
             // Tournament specific date pages
-            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => $date]);
-            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => $date]);
+            $allRoutes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => $date]);
 
             // Tournament total pages
-            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'total']);
-            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'total']);
+            $allRoutes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => 'total']);
 
             // Double stamp total pages
-            $allRoutes[] = route('result.tournament.date', ['club' => $club_id, 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
-            $allRoutes[] = route('result.tournament.date', ['club' => 'default', 'tournament' => $tournament_id, 'date' => 'double-stamp-total']);
+            $allRoutes[] = route('result.tournament.date', ['tournament' => $tournament_id, 'date' => 'double-stamp-total']);
 
             $allTags[] = 'club-' . $club_id;
             $allTags[] = 'club-default';

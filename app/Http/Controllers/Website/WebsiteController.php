@@ -54,42 +54,14 @@ class WebsiteController extends Controller
         return $clubResultIndexView;
     }
 
-    public function tournamentDateResult($club, $tournament, $date)
+    public function tournamentDateResult($tournament, $date)
     {
         $tournament = Tournament::where('id', $tournament)->first();
-
-        if ($tournament->club_id != $club && $club != 'default') {
+        if (!$tournament) {
             abort(404);
         }
+
         $title = $tournament->name;
-        if ($club == 'default') {
-            if (!in_array($date, ['total', 'double-stamp-total'])) {
-                set_time_limit(300);
-                $resultDate = $date;
-                $tournament = $this->websiteService->getTournamentResultByDateForIndex($tournament, $resultDate);
-                $sortedResultAndPlayers = $this->websiteService->getSortedResultByDate($tournament, $resultDate);
-                $players = $tournament->tournamentResult->groupBy('player_id');
-                $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
-            } elseif ($date === 'double-stamp-total') {
-                if (!$tournament->allow_double_stamp) {
-                    abort(404);
-                }
-                set_time_limit(300);
-                $sortedResultAndPlayers = $this->websiteService->getTournamentDoubleStampTotal($tournament);
-                $players = $this->websiteService->getTournamentDoubleStampTotalByDays($tournament);
-                $resultDate = $date;
-                $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
-            } else {
-                set_time_limit(300);
-                $sortedResultAndPlayers = $this->websiteService->getTournamentTotal($tournament);
-                $players = $this->websiteService->getTournamentTotalByDays($tournament);
-                $resultDate = $date;
-                $total = (string) FacadeView::make('website.club.result', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
-
-            }
-
-            return $total;
-        }
 
         if (!in_array($date, ['total', 'double-stamp-total'])) {
             set_time_limit(300);
@@ -97,7 +69,7 @@ class WebsiteController extends Controller
             $tournament = $this->websiteService->getTournamentResultByDateForIndex($tournament, $resultDate);
             $sortedResultAndPlayers = $this->websiteService->getSortedResultByDate($tournament, $resultDate);
             $players = $tournament->tournamentResult->groupBy('player_id');
-            $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
+            $view = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } elseif ($date === 'double-stamp-total') {
             if (!$tournament->allow_double_stamp) {
                 abort(404);
@@ -106,25 +78,28 @@ class WebsiteController extends Controller
             $sortedResultAndPlayers = $this->websiteService->getTournamentDoubleStampTotal($tournament);
             $players = $this->websiteService->getTournamentDoubleStampTotalByDays($tournament);
             $resultDate = $date;
-            $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
+            $view = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         } else {
             set_time_limit(300);
             $sortedResultAndPlayers = $this->websiteService->getTournamentTotal($tournament);
             $players = $this->websiteService->getTournamentTotalByDays($tournament);
             $resultDate = $date;
-            $defaultTotal = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
+            $view = (string) FacadeView::make('website.index', compact('tournament', 'resultDate', 'players', 'sortedResultAndPlayers', 'title'));
         }
 
-        return $defaultTotal;
+        return $view;
     }
 
-    public function loadTournament($club_id, $tournament_id)
+    public function loadTournament($tournament_id)
     {
         $tournament = Tournament::where('id', $tournament_id)->first();
+        if (!$tournament) {
+            abort(404);
+        }
 
         $resultDate = $this->isTodayFlyingDay($tournament);
 
-        return $this->tournamentDateResult($club_id, $tournament->id, $resultDate);
+        return $this->tournamentDateResult($tournament->id, $resultDate);
     }
 
     public function weather()
