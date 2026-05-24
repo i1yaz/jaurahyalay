@@ -8,7 +8,6 @@ use App\Models\Admin\Tournament;
 use App\Services\WebsiteService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View as FacadeView;
 
 class WebsiteController extends Controller
@@ -23,10 +22,7 @@ class WebsiteController extends Controller
     public function index()
     {
         $title = 'Home';
-        $firstActiveTournament = Cache::remember('firstActiveTournament', now()->addMinutes(60), function () {
-            return $this->websiteService->getFirstActiveTournamentForIndex();
-
-        });
+        $firstActiveTournament = $this->websiteService->getFirstActiveTournamentForIndex();
 
         $resultDate = $this->isTodayFlyingDay($firstActiveTournament);
         if ($firstActiveTournament != null && $resultDate != 'total') {
@@ -60,9 +56,7 @@ class WebsiteController extends Controller
 
     public function tournamentDateResult($club, $tournament, $date)
     {
-        $tournament = Cache::store('remember_forever_cache_store')->remember('tournament-date-result-'.$tournament, now()->addMinutes(1440), function () use ($tournament) {
-            return Tournament::where('id', $tournament)->first();
-        });
+        $tournament = Tournament::where('id', $tournament)->first();
 
         if ($tournament->club_id != $club && $club != 'default') {
             abort(404);
@@ -126,9 +120,7 @@ class WebsiteController extends Controller
 
     public function loadTournament($club_id, $tournament_id)
     {
-        $tournament = Cache::store('remember_forever_cache_store')->remember('tournament-date-result-'.$tournament_id, now()->addMinutes(1440), function () use ($tournament_id) {
-            return Tournament::where('id', $tournament_id)->first();
-        });
+        $tournament = Tournament::where('id', $tournament_id)->first();
 
         $resultDate = $this->isTodayFlyingDay($tournament);
 

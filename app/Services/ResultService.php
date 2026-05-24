@@ -115,6 +115,7 @@ class ResultService
             ->where('player_tournament.player_id', $playerId)
             ->where('tournament_flying_days.date', $date)
             ->where('tournaments.allow_auto_update', 1)
+            ->where('tournaments.pigeons', '>=', $pigeonNumber)
             ->select(['tournaments.id as tournament_id', 'tournaments.club_id'])
             ->get();
 
